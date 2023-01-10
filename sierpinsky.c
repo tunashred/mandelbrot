@@ -63,7 +63,7 @@ int main () {
     generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
     printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_patrat_10k.pgm");
 
-     printf("Se genereaza romb 4k\n");
+    printf("Se genereaza romb 4k\n");
     date_initiale_romb_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
     generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
     printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_romb_4k.pgm");
