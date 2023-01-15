@@ -344,5 +344,13 @@ void printare_puncte(struct point2d puncte[], int numar_puncte, int dimensiune, 
         fprintf(pgimg, "\n");
     }
     fclose(pgimg);
+
+    for(int i = 0; i < dimensiune; i++) {
+        free(data[i]);
+        data[i] = NULL;
+    }
+    free(data);
+    data = NULL;
+    
     return;
 }
