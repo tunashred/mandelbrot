@@ -33,7 +33,14 @@ void date_initiale_hexagon_rotit_10k(int *dimensiune, int *latura, int *nr_punct
 
 struct point2d mijloc_latura(struct point2d p1, struct point2d p2);
 void generare_puncte_random(struct point2d puncte[], int numar_puncte, int numar_puncte_initiale);
-void printare_puncte(struct point2d puncte[], int numar_puncte, int dimensiune, char *nume_fisier);
+int **generare_poza(struct point2d puncte[], int numar_puncte, int dimensiune);
+
+void swap(int *x, int *y);
+void clockwise_rotation(int **data, int dimensiune);
+void counterclockwise_rotation(int **data, int dimensiune);
+void vertical_flip(int **data, int dimensiune);
+
+void printare_poza(int **data, int dimensiune, char *nume_fisier);
 
 int main () {
     static int nr_puncte = 5000000;
@@ -41,77 +48,102 @@ int main () {
     int numar_puncte_initiale;
     time_t t;
     int dimensiune, latura;
+    int **data;
     srand((unsigned) time(&t));
 
     printf("Se genereaza triunghi 4k\n");
     date_initiale_triunghi_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
     generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_triunghi_4k.pgm");
+    data = generare_poza(puncte, nr_puncte, dimensiune);
+    vertical_flip(data, dimensiune);
+    printare_poza(data, dimensiune, "sierpinsky_triunghi_4k.pgm");
 
-    printf("Se genereaza triunghi 10k\n");
-    date_initiale_triunghi_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_triunghi_10k.pgm");
+    // printf("Se genereaza triunghi 10k\n");
+    // date_initiale_triunghi_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_triunghi_10k.pgm");
 
-    printf("Se genereaza patrat 4k\n");
-    date_initiale_patrat_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_patrat_4k.pgm");
+    // printf("Se genereaza patrat 4k\n");
+    // date_initiale_patrat_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_patrat_4k.pgm");
 
-    printf("Se genereaza patrat 10k\n");
-    date_initiale_patrat_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_patrat_10k.pgm");
+    // printf("Se genereaza patrat 10k\n");
+    // date_initiale_patrat_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_patrat_10k.pgm");
 
-    printf("Se genereaza romb 4k\n");
-    date_initiale_romb_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_romb_4k.pgm");
+    // printf("Se genereaza romb 4k\n");
+    // date_initiale_romb_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_romb_4k.pgm");
 
-    printf("Se genereaza romb 10k\n");
-    date_initiale_romb_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_romb_10k.pgm");
+    // printf("Se genereaza romb 10k\n");
+    // date_initiale_romb_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_romb_10k.pgm");
 
-    printf("Se genereaza pentagon 4k\n");
-    date_initiale_pentagon_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_pentagon_4k.pgm");
+    // printf("Se genereaza pentagon 4k\n");
+    // date_initiale_pentagon_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_pentagon_4k.pgm");
 
-    printf("Se genereaza pentagon 10k\n");
-    date_initiale_pentagon_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_pentagon_10k.pgm");
+    // printf("Se genereaza pentagon 10k\n");
+    // date_initiale_pentagon_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_pentagon_10k.pgm");
 
-    printf("Se genereaza pentagon rotit 4k\n");
-    date_initiale_pentagon_rotit_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_pentagon_rotit_4k.pgm");
+    // printf("Se genereaza pentagon rotit 4k\n");
+    // date_initiale_pentagon_rotit_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_pentagon_rotit_4k.pgm");
 
-    printf("Se genereaza pentagon rotit 10k\n");
-    date_initiale_pentagon_rotit_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_pentagon_rotit_10k.pgm");
+    // printf("Se genereaza pentagon rotit 10k\n");
+    // date_initiale_pentagon_rotit_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_pentagon_rotit_10k.pgm");
 
-    printf("Se genereaza hexagon 4k\n"); 
-    date_initiale_hexagon_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_hexagon_4k.pgm");
+    // printf("Se genereaza hexagon 4k\n"); 
+    // date_initiale_hexagon_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_hexagon_4k.pgm");
 
-    printf("Se genereaza hexagon 10k\n");
-    date_initiale_hexagon_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_hexagon_10k.pgm");
+    // printf("Se genereaza hexagon 10k\n");
+    // date_initiale_hexagon_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_hexagon_10k.pgm");
 
-    printf("Se genereaza hexagon rotit 4k\n");
-    date_initiale_hexagon_rotit_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_hexagon_rotit_4k.pgm");
+    // printf("Se genereaza hexagon rotit 4k\n");
+    // date_initiale_hexagon_rotit_4k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_hexagon_rotit_4k.pgm");
 
-    printf("Se genereaza hexagon rotit 10k\n");
-    date_initiale_hexagon_rotit_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
-    generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
-    printare_puncte(puncte, nr_puncte, dimensiune, "sierpinsky_hexagon_rotit_10k.pgm");
+    // printf("Se genereaza hexagon rotit 10k\n");
+    // date_initiale_hexagon_rotit_10k(&dimensiune, &latura, &numar_puncte_initiale, puncte);
+    // generare_puncte_random(puncte, nr_puncte, numar_puncte_initiale);
+    // data = generare_poza(puncte, nr_puncte, dimensiune);
+    // counterclockwise_rotation(data, dimensiune);
+    // printare_poza(data, dimensiune, "sierpinsky_hexagon_rotit_10k.pgm");
 
     printf("Spor la cafelutsa cu peste\n");
 
@@ -319,10 +351,8 @@ void generare_puncte_random(struct point2d puncte[], int numar_puncte, int numar
     }
 }
 
-void printare_puncte(struct point2d puncte[], int numar_puncte, int dimensiune, char *nume_fisier) {
+int **generare_poza(struct point2d puncte[], int numar_puncte, int dimensiune) {
     int **data;
-    int x; 
-    int y;
     data = malloc(sizeof(int*) * dimensiune);
     for(int i = 0; i < dimensiune; i++) {
         data[i] = calloc(dimensiune, sizeof(int));
@@ -330,7 +360,54 @@ void printare_puncte(struct point2d puncte[], int numar_puncte, int dimensiune, 
     for(int i = 0; i < numar_puncte; i++) {
         data[(int) puncte[i].x][(int) puncte[i].y] = 1;
     }
+    return data;
+}
 
+void swap(int *x, int *y) {
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+/* Matrix rotated 90 degrees clockwise */
+void clockwise_rotation(int **data, int dimensiune) {
+    // transpose
+    for(int i = 0; i < dimensiune; i++) {
+        for(int j = i; j < dimensiune; j++) {
+            swap(&data[i][j], &data[j][i]);
+        }
+    }
+
+    // vertical mirroring
+    for(int j = 0; j < dimensiune - j - 1; j++) {
+        for(int i = 0; i < dimensiune; i++) {
+            swap(&data[i][j], &data[i][dimensiune - j - 1]);
+        }
+    }
+}
+
+/* Matrix rotated 90 degrees counter-clockwise */
+void counterclockwise_rotation(int **data, int dimensiune) {
+    for(int i = 0; i < dimensiune; i++) {
+        for(int j = i; j < dimensiune; j++) {
+            swap(&data[i][j], &data[j][i]);
+        }
+    }
+
+    // vertical mirroring
+    for(int j = 0; j < dimensiune; j++) {
+        for(int i = 0; i < dimensiune / 2; i++) {
+            swap(&data[i][j], &data[dimensiune - i - 1][j]);
+        }
+    }
+}
+
+void vertical_flip(int **data, int dimensiune) {
+    clockwise_rotation(data, dimensiune);
+    clockwise_rotation(data, dimensiune);
+}
+
+void printare_poza(int **data, int dimensiune, char *nume_fisier) { 
     FILE* pgimg;
     pgimg = fopen(nume_fisier, "wb");
     fprintf(pgimg, "P2\n");
