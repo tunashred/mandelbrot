@@ -53,7 +53,7 @@ bool copyFile(char *src_path, char *dest_path) {
 		}
 	}
 
-	if(chmod(dest_path, S_IRUSR | S_IRGRP | S_IROTH) != 0) {
+	if(chmod(dest_path, S_IRUSR | S_IRGRP | S_IROTH) != 0) { /* -r--r--r-- */
 		printf("Error changing permissions.\n");
 		return false;
 	}
