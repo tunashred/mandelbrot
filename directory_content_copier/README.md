@@ -10,6 +10,7 @@ An equivalent directory will be created in the destination directory, inheriting
 
 Depending on the size of the files:
 	- For files smaller than 500 bytes, a copy of the file will be created in the corresponding place of the destination directory. These copied files will retain only the read permissions. **('-r--r--r-')**
+
 	- For files bigger than 500 bytes, symbolic links will be created poiting to the original files.
 
 **3. Symbolic links:**
