@@ -71,8 +71,6 @@ void recursiveTraversal(char *src_path, char *dest_path) {
 		return;
 	}
 
-	// properties: st_mode, st_size
-	// info: name, 
 	struct stat src_properties;
 	struct dirent *src_info = readdir(src_dir);
 
