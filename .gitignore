@@ -51,11 +51,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-**/*.pgm
-**/*.ppm
-**/*.bak
-**/*.vscode
-
 # VS Code files for those working on multiple tools
 .vscode/*
 !.vscode/settings.json
@@ -89,3 +84,12 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+
+**/*.pgm
+**/*.ppm
+**/*.bak
+**/*.vscode
+**/*.cache
+**/build
+**/*.json
