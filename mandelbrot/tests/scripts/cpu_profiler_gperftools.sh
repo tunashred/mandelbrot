@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 3 ]; then
-	echo "Usage: cpu_profiler_gperftools <executable_path> <profile_file_path> <output_path>"
+	echo "Usage: ./cpu_profiler_gperftools <executable_path> <profile_file_path> <output_path>"
 	exit 1
 fi
 
