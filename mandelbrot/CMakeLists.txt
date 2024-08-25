@@ -16,8 +16,10 @@ set(EXECUTABLE "mandelbrot")
 # Add executable target
 add_executable(${EXECUTABLE} ${SOURCE_FILE})
 
-# Set sanitizer type
-set(SANITIZER "-fsanitize=address")
+# Set sanitizer types
+set(SANITIZER_ADDRESS "-fsanitize=address")
+set(SANITIZER_THREAD "-fsanitize=thread")
+set(SANITIZER_UNDEFINED "-fsanitize=undefined")
 
 #
 # Compile flags for any build type
@@ -34,11 +36,10 @@ add_compile_options(
     -Wconversion
     -pg
     -Wunreachable-code
-    ${SANITIZER}
 )
 
 # Sanitizer option needed at linking stage
-target_link_options(${EXECUTABLE} PRIVATE ${SANITIZER} -lm -lprofiler)
+target_link_options(${EXECUTABLE} PRIVATE -lm -lprofiler)
 
 # Release specific flags
 set(RELEASE_FLAGS
@@ -72,33 +73,64 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
 endif()
 
-#
-# Tests
-#
+# # # # #
+# Tests #
+# # # # #
 
 # Setup
+enable_testing()
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/output)
 set(SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/tests/scripts)
 
+# Function to add custom flags to a build
+# Only for test purposes
+function(add_custom_flags_test test_name flags)
+    set(temp_target "${EXECUTABLE}_${test_name}")
+
+    add_executable(${temp_target} ${SOURCE_FILE})
+
+    target_compile_options(${temp_target} PRIVATE ${flags})
+    target_link_options(${temp_target} PRIVATE ${flags} -lm)
+
+    add_custom_target(${test_name}
+        COMMAND ${CMAKE_COMMAND} --build . --target ${temp_target}
+        COMMAND ${CMAKE_COMMAND} -E env bash -c "${CMAKE_BINARY_DIR}/${temp_target}"
+        COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/${temp_target}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Building and running ${test_name}..."
+    )
+
+    add_test(NAME ${test_name}
+        COMMAND ${CMAKE_COMMAND} --build . --target ${test_name}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+endfunction()
+
+#
+# Sanitizer release tests
+#
+add_custom_flags_test("sanitizer_address" ${SANITIZER_ADDRESS})
+add_custom_flags_test("sanitizer_undefined" ${SANITIZER_UNDEFINED})
+add_custom_flags_test("sanitizer_thread" ${SANITIZER_THREAD})
+
 # Profiling test
-add_custom_target(cputest
+add_custom_target(cpu_profiler_gperftools
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/cpu_profiler_gperftools.sh
-        "${CMAKE_BINARY_DIR}/${EXECUTABLE}"  # Path to the executable
-        "${CMAKE_BINARY_DIR}/mandelbrot.prof" # Path to the profile file
-        "${CMAKE_SOURCE_DIR}/tests/output/cpu_profile_analysis.txt" # Path to the output file
+    "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
+    "${CMAKE_BINARY_DIR}/mandelbrot.prof"
+    "${CMAKE_SOURCE_DIR}/tests/output/cpu_profile_analysis.txt"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running CPU profiler test..."
     DEPENDS ${EXECUTABLE}
 )
 
 # Register the custom target as a test
-add_test(NAME CPU_profiler
-    COMMAND ${CMAKE_COMMAND} --build . --target cputest
+add_test(NAME test_cpu_profiler_gperftools
+    COMMAND ${CMAKE_COMMAND} --build . --target cpu_profiler_gperftools
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
 include(CTest)
-enable_testing()
 ##################################################################
 # Commentary on compile flags
 #
