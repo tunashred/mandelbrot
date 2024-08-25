@@ -57,9 +57,8 @@ set(DEBUG_FLAGS
 
 # Extra compile flags for release build
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_compile_options(
-        ${RELEASE_FLAGS}
-    )
+    add_compile_options(${RELEASE_FLAGS})
+
 # Extra compile flags for debug build
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(${DEBUG_FLAGS})
@@ -113,7 +112,9 @@ add_custom_flags_test("sanitizer_address" ${SANITIZER_ADDRESS})
 add_custom_flags_test("sanitizer_undefined" ${SANITIZER_UNDEFINED})
 add_custom_flags_test("sanitizer_thread" ${SANITIZER_THREAD})
 
-# Profiling test
+#
+# CPU profiling test
+#
 add_custom_target(cpu_profiler_gperftools
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/cpu_profiler_gperftools.sh
     "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
@@ -124,11 +125,28 @@ add_custom_target(cpu_profiler_gperftools
     DEPENDS ${EXECUTABLE}
 )
 
-# Register the custom target as a test
 add_test(NAME test_cpu_profiler_gperftools
     COMMAND ${CMAKE_COMMAND} --build . --target cpu_profiler_gperftools
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+set_tests_properties(test_cpu_profiler_gperftools PROPERTIES LABELS "profiling")
+
+#
+# Memcheck profiling test
+#
+add_custom_target(memcheck_valgrind
+    COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/memcheck_valgrind.sh
+    "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running Valgrind Memcheck..."
+    DEPENDS ${EXECUTABLE}
+)
+
+add_test(NAME test_memcheck_valgrind
+    COMMAND ${CMAKE_COMMAND} --build . --target memcheck_valgrind
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+set_tests_properties(test_memcheck_valgrind PROPERTIES LABELS "profiling")
 
 include(CTest)
 ##################################################################
