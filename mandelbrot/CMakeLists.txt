@@ -115,7 +115,7 @@ add_custom_flags_test("sanitizer_thread" ${SANITIZER_THREAD})
 #
 # CPU profiling test
 #
-add_custom_target(cpu_profiler_gperftools
+add_custom_target(cpu_profiler_gperftools_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/cpu_profiler_gperftools.sh
     "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
     "${CMAKE_BINARY_DIR}/mandelbrot.prof"
@@ -125,16 +125,16 @@ add_custom_target(cpu_profiler_gperftools
     DEPENDS ${EXECUTABLE}
 )
 
-add_test(NAME test_cpu_profiler_gperftools
-    COMMAND ${CMAKE_COMMAND} --build . --target cpu_profiler_gperftools
+add_test(NAME cpu_profiler_gperftools
+    COMMAND ${CMAKE_COMMAND} --build . --target cpu_profiler_gperftools_script
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
-set_tests_properties(test_cpu_profiler_gperftools PROPERTIES LABELS "profiling")
+set_tests_properties(cpu_profiler_gperftools PROPERTIES LABELS "profiling")
 
 #
 # Memcheck profiling test
 #
-add_custom_target(memcheck_valgrind
+add_custom_target(memcheck_valgrind_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/memcheck_valgrind.sh
     "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -142,11 +142,11 @@ add_custom_target(memcheck_valgrind
     DEPENDS ${EXECUTABLE}
 )
 
-add_test(NAME test_memcheck_valgrind
-    COMMAND ${CMAKE_COMMAND} --build . --target memcheck_valgrind
+add_test(NAME memcheck_valgrind
+    COMMAND ${CMAKE_COMMAND} --build . --target memcheck_valgrind_script
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
-set_tests_properties(test_memcheck_valgrind PROPERTIES LABELS "profiling")
+set_tests_properties(memcheck_valgrind PROPERTIES LABELS "profiling")
 
 include(CTest)
 ##################################################################
