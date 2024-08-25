@@ -93,3 +93,4 @@ _deps
 **/*.cache
 **/build
 **/*.json
+**/tests/output
