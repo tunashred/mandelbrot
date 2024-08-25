@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define PI 3.14159265358979323846
-
 // calculeaza f꜀(z)=z²+c
 void mandelbrot(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
     *rez_real = pow(z_real, 2) - pow(z_im, 2) + c_real;
@@ -147,26 +145,25 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
 
     if(cateta_reala < 0) {
         if(cateta_im > 0) {  // cadranul 2
-            radiani = PI - radiani;
+            radiani = M_PI - radiani;
         }
         else {  // cadranul 3
-            radiani = -radiani + PI;
+            radiani = -radiani + M_PI;
         }
     }
     else if(cateta_im < 0) {  // cadranul 4
-        radiani += 2 * PI;
+        radiani += 2 * M_PI;
     }
 
-    grade += linear_map(radiani, 0, 2 * PI, 0, 360);
+    grade += linear_map(radiani, 0, 2 * M_PI, 0, 360);
     if(grade > 360) {
         grade -= 360;
     }
 
-    radiani = linear_map(grade, 0, 360, 0, 2 * PI);
+    radiani = linear_map(grade, 0, 360, 0, 2 * M_PI);
 
     *real =     cos(radiani) * raza + centru_real;
     *imaginar = sin(radiani) * raza + centru_im;
-    
 }
 
 void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters) {
@@ -230,7 +227,7 @@ void mandelbrot_around_center(char *nume_poza, int inaltime_poza, int latime_poz
 
 int main() {
     float scale = 0.5;
-    mandelbrot_around_center("tot_setul.ppm", 1080 * scale, 1920 * scale, 0, -0.2, 1.15, 1500);
+    mandelbrot_around_center("tot_setul.ppm", 1080 * scale, 1920 * scale, -0.43, 0, 1, 1500);
     // mandelbrot_around_center("pe_crestele_crapaturii_de_jos.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.75 + 0.00005, -0.02, 0.00025, 1500);
     // mandelbrot_around_center("spirale.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.72413, 0.28644, 0.0004, 1500);
     // mandelbrot_around_center("subtioru_stang_7.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.7, -0.26, 0.01, 1500);
