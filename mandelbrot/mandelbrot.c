@@ -166,6 +166,20 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
     *imaginar = sin(radiani) * raza + centru_im;
 }
 
+void progress_print(int* numar_pixeli, int* pixel_curent) {
+    char* lines = "/-\\";
+    static int procent = 1;
+    static int anunta_la = 0;
+    int pixel_per_procent = *numar_pixeli / 100; // need to find a way to make it work with static qualifier
+
+    if(*pixel_curent == anunta_la) {
+        fflush(stdout);
+        printf("%d%% complete... %c\r", procent, lines[procent % 3]);
+        anunta_la += pixel_per_procent;
+        procent++;
+    }
+}
+
 void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters) {
     // generam paleta de culori
     int r[1500];
@@ -190,9 +204,6 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
 
     int numar_pixeli = inaltime_poza * latime_poza;
     int pixel_curent = 0;
-    int pixel_per_procent = numar_pixeli / 100;
-    int anunta_la = 0;
-    int procent = 1;
 
     double parte_imaginara = top_left_coord_imaginar;
     for(int i = 0; i < inaltime_poza; i++) {
@@ -204,10 +215,8 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
             int iter_count = diverge(real_rotit, im_rotit, num_iters);
             fprintf(pgimg, "%d %d %d\n", r[rgb[iter_count][0]], g[rgb[iter_count][1]], b[rgb[iter_count][2]]);
             parte_reala += pixel_width;
-            if(pixel_curent == anunta_la) {
-                printf("%d%%\n", procent++);
-                anunta_la += pixel_per_procent;
-            }
+
+            progress_print(&numar_pixeli, &pixel_curent);
             pixel_curent++;
         }
         fprintf(pgimg, "\n");
