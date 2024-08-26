@@ -79,9 +79,11 @@ endif()
 # Setup
 enable_testing()
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/output)
+set(LOGS_DIR ${CMAKE_SOURCE_DIR}/tests/output)
 set(SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/tests/scripts)
 
 # Function to add custom flags to a build
+# It builds the project, runs it and then deletes the executable
 # Only for test purposes
 function(add_custom_flags_test test_name flags)
     set(temp_target "${EXECUTABLE}_${test_name}")
@@ -119,7 +121,7 @@ add_custom_target(cpu_profiler_gperftools_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/cpu_profiler_gperftools.sh
     "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
     "${CMAKE_BINARY_DIR}/mandelbrot.prof"
-    "${CMAKE_SOURCE_DIR}/tests/output/cpu_profile_analysis.txt"
+    "${LOGS_DIR}/cpu_profile_analysis.txt"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running CPU profiler test..."
     DEPENDS ${EXECUTABLE}
@@ -137,6 +139,7 @@ set_tests_properties(cpu_profiler_gperftools PROPERTIES LABELS "profiling")
 add_custom_target(memcheck_valgrind_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/memcheck_valgrind.sh
     "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
+    "${LOGS_DIR}"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running Valgrind Memcheck..."
     DEPENDS ${EXECUTABLE}
