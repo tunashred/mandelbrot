@@ -1,8 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include "mandelbrot.h"
+#include "color_mapping.h"
 
-// calculeaza f꜀(z)=z²+c
 void mandelbrot(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
     *rez_real = pow(z_real, 2) - pow(z_im, 2) + c_real;
     *rez_im = 2 * z_real * z_im + c_im;
@@ -10,7 +8,6 @@ void mandelbrot(double z_real, double z_im, double c_real, double c_im, double *
     // *rez_im = 5 * pow(z_real, 4) * z_im - 10 * pow(z_real, 2) * pow(z_im, 3) + pow(z_im, 5) + c_im;
 }
 
-// verifica daca diverge pentru c_real, c_im
 int diverge(double c_real, double c_im, int num_iters) {
     int i = 0;
     double z_real = 0, z_im = 0;
@@ -27,116 +24,6 @@ int diverge(double c_real, double c_im, int num_iters) {
     return i;
 }
 
-double linear_map(double from, double from_min, double from_max, double to_min, double to_max) {
-    double interval_from = from_max - from_min;
-    double interval_to = to_max - to_min;
-    double normalised_from = from - from_min;
-    double normalised_to = interval_to * normalised_from / interval_from;
-    return to_min + normalised_to;
-}
-
-// y = sin(x/3), x <= 100
-int sin_crescator(int iter_count, int num_iters) {
-    double max_x = 100;
-    double x = linear_map(iter_count, 0, num_iters, 0, max_x);
-    double y = sin(x / 3) + x / 10;
-    double max_y = sin(max_x / 3) + max_x / 10;
-    return (int) linear_map(y, 0, max_y, 0, 255);
-}
-
-// y = log(x)/sin(x)+1, 0.6 < x < 2.5 ==> 0 < y < 2.532
-int log_pe_sin(int iter_count, int num_iters) {
-    double x = linear_map(iter_count, 0, num_iters, 0.6, 2.5);
-    double y = log(x) / sin(x) + 1;
-    return (int) linear_map(y, 0, 2.532, 0, 255);
-}
-
-// y = 1 - 1/x, 1 < x < 2.5 ==> 0 < y < 0.6
-int unu_minus_unu_pe_x(int iter_count, int num_iters) {
-    double x = linear_map(iter_count, 0, num_iters, 1, 2.5);
-    double y = 1 - 1 / x;
-    return (int) linear_map(y, 0, 0.6, 0, 255);
-}
-
-// y = x², 0 < x < 0.5 ==> 0 < y < 0.25
-int x_patrat_0_5(int iter_count, int num_iters) {
-    double x = linear_map(iter_count, 0, num_iters, 0, 0.5);
-    double y = pow(x, 2);
-    return (int) linear_map(y, 0, 0.25, 0, 255);
-}
-
-// y = x², 0 < x < 0.1 ==> 0 < y < 0.01
-int x_patrat_0_1(int iter_count, int num_iters) {
-    double x = linear_map(iter_count, 0, num_iters, 0, 0.1);
-    double y = pow(x, 2);
-    return (int) linear_map(y, 0, 0.01, 0, 255);
-}
-
-// y = x², 0.1 < x < 0.2
-int x_patrat_0_1_to_0_2(int iter_count, int num_iters) {
-    double min_x = 0.1;
-    double max_x = 0.2;
-    double x = linear_map(iter_count, 0, num_iters, min_x, max_x);
-    double y = pow(x, 2);
-    double min_y = pow(min_x, 2);
-    double max_y = pow(max_x, 2);
-    return (int) linear_map(y, min_y, max_y, 0, 255);
-}
-
-// y = sin(x)+1, 4.7 < x < 7.5
-int sin_jos_sus_jos(int iter_count, int num_iters) {
-    double min_x = 4.7;
-    double max_x = 7.5;
-    double x = linear_map(iter_count, 0, num_iters, min_x, max_x);
-    double y = sin(x) + 1;
-    double min_y = sin(min_x) + 1;
-    double max_y = sin(max_x) + 1;
-    return (int) linear_map(y, min_y, max_y, 0, 255);
-}
-
-// y = sin(x⁴)+1, 2.04 < x < 2.9
-int sin_x_la_4(int iter_count, int num_iters) {
-    double min_x = 2.04;
-    double max_x = 2.9;
-    double x = linear_map(iter_count, 0, num_iters, min_x, max_x);
-    double y = sin(pow(x, 4)) + 1;
-    double min_y = sin(pow(min_x, 4)) + 1;
-    double max_y = sin(pow(max_x, 4)) + 1;
-    return (int) linear_map(y, min_y, max_y, 0, 255);
-}
-
-int mapare_simpla(int iter_count, int num_iters) {
-    return (int) linear_map(iter_count, 0, num_iters, 0, 255);
-}
-
-int red(int iter_count, int num_iters) {
-    if(iter_count == 0) {
-        return 0;
-    }
-    return mapare_simpla(iter_count, num_iters);
-}
-
-int green(int iter_count, int num_iters) {
-    if(iter_count == 0) {
-        return 0;
-    }
-    return mapare_simpla(iter_count, num_iters);
-}
-
-int blue(int iter_count, int num_iters) {
-    if(iter_count == 0) {
-        return 0;
-    }
-    return mapare_simpla(iter_count, num_iters);
-}
-
-/*
-    1. Determinam lungimea razei folosind Pitagora.
-    2. Determinam unghiul in radiani.
-    3. Aflam in ce cadran mutam punctul si calculam distanta lui fata de punctul (1, 0).
-    4. Convertim radianii in grade si corectam valoarea daca este mai mare decat 360.
-    5. Convertim gradele in radiani si calculam coordonatele reale si imaginare ale punctului rotit.
-*/
 void roteste(double *real, double *imaginar, double centru_real, double centru_im, double grade) {
     double cateta_reala = *real - centru_real,
            cateta_im =    *imaginar - centru_im;
@@ -234,13 +121,3 @@ void mandelbrot_around_center(char *nume_poza, int inaltime_poza, int latime_poz
     deseneaza_mandelbrot(nume_poza, inaltime_poza, latime_poza, top_left_coord_real, top_left_coord_imaginar, pixel_width, num_iters);
 }
 
-int main() {
-    float scale = 0.5;
-    mandelbrot_around_center("tot_setul.ppm", 1080 * scale, 1920 * scale, -0.43, 0, 1, 1500);
-    // mandelbrot_around_center("pe_crestele_crapaturii_de_jos.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.75 + 0.00005, -0.02, 0.00025, 1500);
-    // mandelbrot_around_center("spirale.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.72413, 0.28644, 0.0004, 1500);
-    // mandelbrot_around_center("subtioru_stang_7.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.7, -0.26, 0.01, 1500);
-    // mandelbrot_around_center("pene_de_paun.ppm", 1080 * scale, 1080 * 1.2 * scale, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035, 1500);
-
-    return 0;
-}
