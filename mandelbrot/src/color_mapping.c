@@ -74,23 +74,63 @@ int mapare_simpla(int iter_count, int num_iters) {
     return (int) linear_map(iter_count, 0, num_iters, 0, 255);
 }
 
-int red(int iter_count, int num_iters) {
+int red(int iter_count, int num_iters, int (*color_mapping_func)(int, int)) {
     if(iter_count == 0) {
         return 0;
     }
-    return mapare_simpla(iter_count, num_iters);
+    return color_mapping_func(iter_count, num_iters);
 }
 
-int green(int iter_count, int num_iters) {
+int green(int iter_count, int num_iters, int (*color_mapping_func)(int, int)) {
     if(iter_count == 0) {
         return 0;
     }
-    return mapare_simpla(iter_count, num_iters);
+    return color_mapping_func(iter_count, num_iters);
 }
 
-int blue(int iter_count, int num_iters) {
+int blue(int iter_count, int num_iters, int (*color_mapping_func)(int, int)) {
     if(iter_count == 0) {
         return 0;
     }
-    return mapare_simpla(iter_count, num_iters);
+    return color_mapping_func(iter_count, num_iters);
+}
+
+void generate_color_palette(
+        ColorPalette* palette,
+        double brightness_rate,
+        const char* palette_file,
+        int (*red_func)(int, int),
+        int (*green_func)(int, int),
+        int (*blue_func)(int, int)
+) {
+    // Case 1: Loading from file
+    if(palette_file) {
+        FILE* file = fopen(palette_file, "r");
+        if(!file) {
+            fprintf(stderr, "Couldn't open the file: %s\n", palette_file);
+            return;
+        }
+        
+        for(int i = 0; i < NUM_COLORS; i++) {
+            if(fscanf(file, "%d %d %d", &palette->r[i], &palette->g[i], &palette->b[i]) != 3) {
+                fprintf(stderr, "Incomplete palette file\n");
+                return;
+            }
+            palette->rgb[i][0] = fmin(1499, palette->r[i] * brightness_rate);
+            palette->rgb[i][1] = fmin(1499, palette->g[i] * brightness_rate);
+            palette->rgb[i][2] = fmin(1499, palette->b[i] * brightness_rate);
+        }
+        fclose(file);
+    }
+
+    // Case 2: Generate using given color mapping functions
+    for(int i = 0; i < NUM_COLORS; i++) {
+        palette->r[i] = red(i, NUM_COLORS, red_func);
+        palette->g[i] = green(i, NUM_COLORS, green_func);
+        palette->b[i] = blue(i, NUM_COLORS, blue_func);
+
+        palette->rgb[i][0] = fmin(1499, palette->r[i] * brightness_rate);
+        palette->rgb[i][1] = fmin(1499, palette->g[i] * brightness_rate);
+        palette->rgb[i][2] = fmin(1499, palette->b[i] * brightness_rate);
+    }
 }

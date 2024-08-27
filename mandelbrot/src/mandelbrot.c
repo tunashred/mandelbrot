@@ -69,19 +69,10 @@ void progress_print(int* numar_pixeli, int* pixel_curent) {
 
 void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters) {
     // generam paleta de culori
-    int r[1500];
-    int g[1500];
-    int b[1500];
-    int rgb[1500][3];
+    ColorPalette palette;
     double brightness_rate = 1;
-    for(int j = 0; j < 1500; j++) {
-        r[j] = red(j, 1500);
-        g[j] = green(j, 1500);
-        b[j] = blue(j, 1500);
-        rgb[j][0] = fmin(1499, (j * 7 % 1500) * brightness_rate);
-        rgb[j][1] = fmin(1499, (j * 3 % 1500) * brightness_rate);
-        rgb[j][2] = fmin(1499, (j * 11 % 1500) * brightness_rate);
-    }
+
+    generate_color_palette(&palette, brightness_rate, NULL, log_pe_sin, x_patrat_0_1, sin_crescator);
 
     FILE* pgimg;
     pgimg = fopen(nume_poza, "wb");
@@ -100,7 +91,7 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
                    im_rotit   = parte_imaginara;
             roteste(&real_rotit, &im_rotit, -0.75, 0, 15);
             int iter_count = diverge(real_rotit, im_rotit, num_iters);
-            fprintf(pgimg, "%d %d %d\n", r[rgb[iter_count][0]], g[rgb[iter_count][1]], b[rgb[iter_count][2]]);
+            fprintf(pgimg, "%d %d %d\n", palette.r[palette.rgb[iter_count][0]], palette.g[palette.rgb[iter_count][1]], palette.b[palette.rgb[iter_count][2]]);
             parte_reala += pixel_width;
 
             progress_print(&numar_pixeli, &pixel_curent);

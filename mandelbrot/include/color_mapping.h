@@ -1,7 +1,17 @@
 #ifndef COLOR_MAPPING_H
 #define COLOR_MAPPING_H
 
+#include <stdio.h>
 #include <math.h>
+
+#define NUM_COLORS 1500
+
+typedef struct {
+    int r[NUM_COLORS];
+    int g[NUM_COLORS];
+    int b[NUM_COLORS];
+    int rgb[NUM_COLORS][3];
+} ColorPalette;
 
 double linear_map(double from, double from_min, double from_max, double to_min, double to_max);
 
@@ -31,10 +41,19 @@ int sin_x_la_4(int iter_count, int num_iters);
 
 int mapare_simpla(int iter_count, int num_iters);
 
-int red(int iter_count, int num_iters);
+int red(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
 
-int green(int iter_count, int num_iters);
+int green(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
 
-int blue(int iter_count, int num_iters);
+int blue(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
+
+void generate_color_palette(
+    ColorPalette* palette,
+    double brightness_rate,
+    const char* palette_file,
+    int (*red_func)(int, int),
+    int (*green_func)(int, int),
+    int (*blue_func)(int, int)
+);
 
 #endif
