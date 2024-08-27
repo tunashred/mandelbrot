@@ -39,6 +39,10 @@ int diverge(double c_real, double c_im, int num_iters, void (*mandelbrot_func)(d
 }
 
 void roteste(double *real, double *imaginar, double centru_real, double centru_im, double grade) {
+    if(grade == 0) {
+        return;
+    }
+
     double cateta_reala = *real - centru_real,
            cateta_im =    *imaginar - centru_im;
     double raza = sqrt( pow(cateta_reala, 2) + pow(cateta_im, 2) );
@@ -91,7 +95,7 @@ FILE* initialize_image(char* image_name, int height, int width) {
     return pgimg;
 }
 
-void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters) {
+void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters, double rotate_degrees) {
     // generam paleta de culori
     ColorPalette palette;
     double brightness_rate = 1;
@@ -109,8 +113,9 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
         for(int j = 0; j < latime_poza; j++) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
-            roteste(&real_rotit, &im_rotit, -0.75, 0, 15);
-            int iter_count = diverge(real_rotit, im_rotit, num_iters, mandelbrot_quintic);
+            roteste(&real_rotit, &im_rotit, -0.75, 0, rotate_degrees);
+            
+            int iter_count = diverge(real_rotit, im_rotit, num_iters, mandelbrot_quadratic);
             fprintf(pgimg, "%d %d %d\n",
                     palette.r[palette.rgb[iter_count][0]],
                     palette.g[palette.rgb[iter_count][1]],
@@ -127,12 +132,11 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
     fclose(pgimg);
 }
 
-void mandelbrot_around_center(char *nume_poza, int inaltime_poza, int latime_poza, double center_coord_real, double center_coord_imaginar, double radius, int num_iters) {
+void mandelbrot_around_center(char *nume_poza, int inaltime_poza, int latime_poza, double center_coord_real, double center_coord_imaginar, double radius, int num_iters, double rotate_degrees) {
     int latura_scurta =             (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     double pixel_width =             radius * 2 / latura_scurta;
     double top_left_coord_real =     center_coord_real - latime_poza / 2 * pixel_width;
     double top_left_coord_imaginar = center_coord_imaginar + inaltime_poza / 2 * pixel_width;
 
-    deseneaza_mandelbrot(nume_poza, inaltime_poza, latime_poza, top_left_coord_real, top_left_coord_imaginar, pixel_width, num_iters);
+    deseneaza_mandelbrot(nume_poza, inaltime_poza, latime_poza, top_left_coord_real, top_left_coord_imaginar, pixel_width, num_iters, rotate_degrees);
 }
-
