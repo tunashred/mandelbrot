@@ -32,10 +32,10 @@ find_library(GTEST_LIB gtest HINTS /usr/lib64)
 find_library(GTEST_MAIN_LIB gtest_main HINTS /usr/lib64)
 
 # Add executable for tests
-add_executable(tests ${CMAKE_SOURCE_DIR}/tests/performance/test_mandelbrot.c)
+add_executable(test_mandelbrot ${CMAKE_SOURCE_DIR}/tests/performance/test_mandelbrot.c)
 # Link libs for tests
-target_link_libraries(tests ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
-target_link_options(tests PRIVATE -lm -lprofiler)
+target_link_libraries(test_mandelbrot ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
+target_link_options(test_mandelbrot PRIVATE -lm -lprofiler) # do I need this?
 
 #
 # Compile flags for any build type
@@ -54,7 +54,7 @@ add_compile_options(
     -Wunreachable-code
 )
 
-# Sanitizer option needed at linking stage
+# Link libs
 target_link_options(${EXECUTABLE} PRIVATE -lm -lprofiler)
 
 # Release specific flags
