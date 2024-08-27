@@ -1,19 +1,33 @@
 #include "mandelbrot.h"
 #include "color_mapping.h"
 
-void mandelbrot(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
+void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
     *rez_real = pow(z_real, 2) - pow(z_im, 2) + c_real;
     *rez_im = 2 * z_real * z_im + c_im;
-    // *rez_real = pow(z_real, 5) - 10 * pow(z_real, 3) * pow(z_im, 2) + 5 * z_real * pow(z_im, 4) + c_real;
-    // *rez_im = 5 * pow(z_real, 4) * z_im - 10 * pow(z_real, 2) * pow(z_im, 3) + pow(z_im, 5) + c_im;
 }
 
-int diverge(double c_real, double c_im, int num_iters) {
+void mandelbrot_cubic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
+    *rez_real = pow(z_real, 3) - 3 * z_real * pow(z_im, 2) + c_real;
+    *rez_im = 3 * pow(z_real, 2) * z_im - pow(z_im, 3) + c_im;
+}
+
+void mandelbrot_quartic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
+    *rez_real = pow(z_real, 4) - 6 * pow(z_real, 2) * pow(z_im, 2) + pow(z_im, 4) + c_real;
+    *rez_im = 4 * pow(z_real, 3) * z_im - 4 * z_real * pow(z_im, 3) + c_im;
+}
+
+void mandelbrot_quintic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
+    *rez_real = pow(z_real, 5) - 10 * pow(z_real, 3) * pow(z_im, 2) + 5 * z_real * pow(z_im, 4) + c_real;
+    *rez_im = 5 * pow(z_real, 4) * z_im - 10 * pow(z_real, 2) * pow(z_im, 3) + pow(z_im, 5) + c_im;
+}
+
+
+int diverge(double c_real, double c_im, int num_iters, void (*mandelbrot_func)(double, double, double, double, double*, double*)) {
     int i = 0;
     double z_real = 0, z_im = 0;
     double z_real_returnat, z_im_returnat;
     while( z_real <= 2.f && z_real >= -2.f && i++ <= num_iters ) {
-        mandelbrot(z_real, z_im, c_real, c_im, &z_real_returnat, &z_im_returnat);
+        mandelbrot_func(z_real, z_im, c_real, c_im, &z_real_returnat, &z_im_returnat);
         z_real = z_real_returnat;
         z_im = z_im_returnat;
     }
@@ -53,6 +67,7 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
     *imaginar = sin(radiani) * raza + centru_im;
 }
 
+
 void progress_print(int* numar_pixeli, int* pixel_curent) {
     char* lines = "/-\\";
     static int procent = 1;
@@ -67,18 +82,23 @@ void progress_print(int* numar_pixeli, int* pixel_curent) {
     }
 }
 
+FILE* initialize_image(char* image_name, int height, int width) {
+    FILE* pgimg;
+    pgimg = fopen(image_name, "wb");
+    fprintf(pgimg, "P3\n"); 
+    fprintf(pgimg, "%d %d\n", width, height);
+    fprintf(pgimg, "255\n");
+    return pgimg;
+}
+
 void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters) {
     // generam paleta de culori
     ColorPalette palette;
     double brightness_rate = 1;
 
-    generate_color_palette(&palette, brightness_rate, NULL, log_pe_sin, x_patrat_0_1, sin_crescator);
+    generate_color_palette(&palette, brightness_rate, NULL, x_patrat_0_5, log_pe_sin, sin_crescator);
 
-    FILE* pgimg;
-    pgimg = fopen(nume_poza, "wb");
-    fprintf(pgimg, "P3\n"); 
-    fprintf(pgimg, "%d %d\n", latime_poza, inaltime_poza);
-    fprintf(pgimg, "255\n");
+    FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
 
     int numar_pixeli = inaltime_poza * latime_poza;
     int pixel_curent = 0;
@@ -90,8 +110,12 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
             roteste(&real_rotit, &im_rotit, -0.75, 0, 15);
-            int iter_count = diverge(real_rotit, im_rotit, num_iters);
-            fprintf(pgimg, "%d %d %d\n", palette.r[palette.rgb[iter_count][0]], palette.g[palette.rgb[iter_count][1]], palette.b[palette.rgb[iter_count][2]]);
+            int iter_count = diverge(real_rotit, im_rotit, num_iters, mandelbrot_quintic);
+            fprintf(pgimg, "%d %d %d\n",
+                    palette.r[palette.rgb[iter_count][0]],
+                    palette.g[palette.rgb[iter_count][1]],
+                    palette.b[palette.rgb[iter_count][2]]
+            );
             parte_reala += pixel_width;
 
             progress_print(&numar_pixeli, &pixel_curent);
