@@ -27,6 +27,16 @@ set(SANITIZER_UNDEFINED "-fsanitize=undefined")
 # Include the tests
 include(Tests.cmake)
 
+# Get gtest lib
+find_library(GTEST_LIB gtest HINTS /usr/lib64)
+find_library(GTEST_MAIN_LIB gtest_main HINTS /usr/lib64)
+
+# Add executable for tests
+add_executable(tests ${CMAKE_SOURCE_DIR}/tests/performance/test_mandelbrot.c)
+# Link libs for tests
+target_link_libraries(tests ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
+target_link_options(tests PRIVATE -lm -lprofiler)
+
 #
 # Compile flags for any build type
 #
