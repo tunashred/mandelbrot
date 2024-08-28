@@ -71,14 +71,15 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
     *imaginar = sin(radiani) * raza + centru_im;
 }
 
-
+// Apparently this function is no bueno. It does not work properly when printing multiple images
+// Also, maybe I can inline it
 void progress_print(int* numar_pixeli, int* pixel_curent) {
     char* lines = "/-\\";
     static int procent = 1;
     static int anunta_la = 0;
     int pixel_per_procent = *numar_pixeli / 100; // need to find a way to make it work with static qualifier
 
-    if(*pixel_curent == anunta_la) {
+    if((*pixel_curent)++ == anunta_la) {
         fflush(stdout);
         printf("%d%% complete... %c\r", procent, lines[procent % 3]);
         anunta_la += pixel_per_procent;
@@ -96,7 +97,6 @@ FILE* initialize_image(char* image_name, int height, int width) {
 }
 
 void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters, double rotate_degrees) {
-    // generam paleta de culori
     ColorPalette palette;
     double brightness_rate = 1;
 
@@ -105,6 +105,9 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
     FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
 
     int numar_pixeli = inaltime_poza * latime_poza;
+    // I wish I could get rid of this.. If I were to move the initialization inside progress_print
+    // then it would need to be static. And because of this, having multiple images queued to print,
+    // an extra check will be needed for when it reaches 100% to be reset
     int pixel_curent = 0;
 
     double parte_imaginara = top_left_coord_imaginar;
@@ -124,7 +127,6 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
             parte_reala += pixel_width;
 
             progress_print(&numar_pixeli, &pixel_curent);
-            pixel_curent++;
         }
         fprintf(pgimg, "\n");
         parte_imaginara -= pixel_width;
@@ -135,8 +137,8 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
 void mandelbrot_around_center(char *nume_poza, int inaltime_poza, int latime_poza, double center_coord_real, double center_coord_imaginar, double radius, int num_iters, double rotate_degrees) {
     int latura_scurta =             (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     double pixel_width =             radius * 2 / latura_scurta;
-    double top_left_coord_real =     center_coord_real - latime_poza / 2 * pixel_width;
-    double top_left_coord_imaginar = center_coord_imaginar + inaltime_poza / 2 * pixel_width;
+    double top_left_coord_real =     center_coord_real - (double)latime_poza / 2 * pixel_width;
+    double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
     deseneaza_mandelbrot(nume_poza, inaltime_poza, latime_poza, top_left_coord_real, top_left_coord_imaginar, pixel_width, num_iters, rotate_degrees);
 }
