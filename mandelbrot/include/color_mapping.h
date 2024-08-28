@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 #define NUM_COLORS 1500
 
@@ -47,7 +48,7 @@ int green(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
 
 int blue(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
 
-void generate_color_palette(
+int generate_color_palette(
     ColorPalette* palette,
     double brightness_rate,
     const char* palette_file,

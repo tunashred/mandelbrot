@@ -100,7 +100,9 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
     ColorPalette palette;
     double brightness_rate = 1;
 
-    generate_color_palette(&palette, brightness_rate, NULL, x_patrat_0_5, log_pe_sin, sin_crescator);
+    if(generate_color_palette(&palette, brightness_rate, NULL, x_patrat_0_5, log_pe_sin, NULL) == EXIT_FAILURE) {
+        return;
+    }
 
     FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
 
