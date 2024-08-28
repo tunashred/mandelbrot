@@ -96,11 +96,16 @@ FILE* initialize_image(char* image_name, int height, int width) {
     return pgimg;
 }
 
-void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real, double top_left_coord_imaginar, double pixel_width, int num_iters, double rotate_degrees) {
+void deseneaza_mandelbrot(
+    char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real,
+    double top_left_coord_imaginar, double pixel_width, int num_iters,
+    double rotate_degrees, double brightness, int (*red_mapping_func)(int, int),
+    int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+) {
     ColorPalette palette;
     double brightness_rate = 1;
 
-    if(generate_color_palette(&palette, brightness_rate, NULL, x_patrat_0_5, log_pe_sin, NULL) == EXIT_FAILURE) {
+    if(generate_color_palette(&palette, brightness_rate, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
         return;
     }
 
@@ -136,11 +141,21 @@ void deseneaza_mandelbrot(char *nume_poza, int inaltime_poza, int latime_poza, d
     fclose(pgimg);
 }
 
-void mandelbrot_around_center(char *nume_poza, int inaltime_poza, int latime_poza, double center_coord_real, double center_coord_imaginar, double radius, int num_iters, double rotate_degrees) {
+void mandelbrot_around_center(
+    char *nume_poza, int inaltime_poza, int latime_poza,
+    double center_coord_real, double center_coord_imaginar, double radius,
+    int num_iters, double rotate_degrees, double brightness,
+    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+) {
     int latura_scurta =             (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     double pixel_width =             radius * 2 / latura_scurta;
     double top_left_coord_real =     center_coord_real - (double)latime_poza / 2 * pixel_width;
     double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
-    deseneaza_mandelbrot(nume_poza, inaltime_poza, latime_poza, top_left_coord_real, top_left_coord_imaginar, pixel_width, num_iters, rotate_degrees);
+    deseneaza_mandelbrot(
+        nume_poza, inaltime_poza, latime_poza,
+        top_left_coord_real, top_left_coord_imaginar, pixel_width,
+        num_iters, rotate_degrees, brightness,
+        red_mapping_func, green_mapping_func, blue_mapping_func
+    );
 }
