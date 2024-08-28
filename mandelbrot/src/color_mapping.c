@@ -121,8 +121,8 @@ void generate_color_palette(
             palette->rgb[i][2] = fmin(1499, palette->b[i] * brightness_rate);
         }
         fclose(file);
+        return;
     }
-
     // Case 2: Generate using given color mapping functions
     for(int i = 0; i < NUM_COLORS; i++) {
         palette->r[i] = red(i, NUM_COLORS, red_func);
