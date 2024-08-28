@@ -71,19 +71,13 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
     *imaginar = sin(radiani) * raza + centru_im;
 }
 
-// Apparently this function is no bueno. It does not work properly when printing multiple images
-// Also, maybe I can inline it
-void progress_print(int* numar_pixeli, int* pixel_curent) {
-    char* lines = "/-\\";
-    static int procent = 1;
-    static int anunta_la = 0;
-    int pixel_per_procent = *numar_pixeli / 100; // need to find a way to make it work with static qualifier
-
-    if((*pixel_curent)++ == anunta_la) {
+// TODO: variable number of dots at loading and fix dangling symbol when 100% is reached
+void progress_print(progress_state* progress) {
+    if(progress->current_pixel++ == progress->pixel_waypoint) {
+        printf("%d%% complete... %c\r", progress->current_procent, progress->symbols[progress->current_procent % progress->symbols_count]);
         fflush(stdout);
-        printf("%d%% complete... %c\r", procent, lines[procent % 3]);
-        anunta_la += pixel_per_procent;
-        procent++;
+        progress->pixel_waypoint += progress->pixel_per_procent;
+        progress->current_procent++;
     }
 }
 
@@ -102,7 +96,7 @@ void deseneaza_mandelbrot(
     double rotate_degrees, double brightness, int (*red_mapping_func)(int, int),
     int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
 ) {
-    ColorPalette palette;
+    color_palette palette;
     double brightness_rate = 1;
 
     if(generate_color_palette(&palette, brightness_rate, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
@@ -112,10 +106,15 @@ void deseneaza_mandelbrot(
     FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
 
     int numar_pixeli = inaltime_poza * latime_poza;
-    // I wish I could get rid of this.. If I were to move the initialization inside progress_print
-    // then it would need to be static. And because of this, having multiple images queued to print,
-    // an extra check will be needed for when it reaches 100% to be reset
-    int pixel_curent = 0;
+    progress_state progress = (progress_state) {
+        .total_pixels = &numar_pixeli,
+        .pixel_per_procent = numar_pixeli / 100,
+        .current_pixel = 0,
+        .current_procent = 1,
+        .pixel_waypoint = 0,
+        .symbols = "/-\\",
+        .symbols_count = 3
+    };
 
     double parte_imaginara = top_left_coord_imaginar;
     for(int i = 0; i < inaltime_poza; i++) {
@@ -133,7 +132,7 @@ void deseneaza_mandelbrot(
             );
             parte_reala += pixel_width;
 
-            progress_print(&numar_pixeli, &pixel_curent);
+            progress_print(&progress);
         }
         fprintf(pgimg, "\n");
         parte_imaginara -= pixel_width;

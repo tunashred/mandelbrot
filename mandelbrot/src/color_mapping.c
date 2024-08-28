@@ -96,7 +96,7 @@ int blue(int iter_count, int num_iters, int (*color_mapping_func)(int, int)) {
 }
 
 int generate_color_palette(
-        ColorPalette* palette,
+        color_palette* palette,
         double brightness_rate,
         const char* palette_file,
         int (*red_func)(int, int),

@@ -29,7 +29,18 @@ int diverge(double c_real, double c_im, int num_iters, void (*mandelbrot_func)(d
 */
 void roteste(double *real, double *imaginar, double centru_real, double centru_im, double grade);
 
-void progress_print(int* numar_pixeli, int* pixel_curent);
+typedef struct {
+    const int* total_pixels;
+    const int pixel_per_procent;
+    int current_pixel; // = 0
+    int current_procent; // = 1
+    int pixel_waypoint;
+    const char* symbols;
+    const int symbols_count;
+
+} progress_state;
+
+void progress_print(progress_state* progress);
 
 FILE* initialize_image(char* image_name, int height, int width);
 

@@ -12,7 +12,7 @@ typedef struct {
     int g[NUM_COLORS];
     int b[NUM_COLORS];
     int rgb[NUM_COLORS][3];
-} ColorPalette;
+} color_palette;
 
 double linear_map(double from, double from_min, double from_max, double to_min, double to_max);
 
@@ -49,7 +49,7 @@ int green(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
 int blue(int iter_count, int num_iters, int (*color_mapping_func)(int, int));
 
 int generate_color_palette(
-    ColorPalette* palette,
+    color_palette* palette,
     double brightness_rate,
     const char* palette_file,
     int (*red_func)(int, int),
