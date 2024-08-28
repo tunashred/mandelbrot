@@ -1,7 +1,12 @@
 # Tests.cmake
+cmake_minimum_required(VERSION 3.1.0)
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Setup
 enable_testing()
+include(CTest)
+
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/output)
 set(LOGS_DIR ${CMAKE_SOURCE_DIR}/tests/output)
 set(SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/tests/scripts)
@@ -12,7 +17,7 @@ set(SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/tests/scripts)
 function(add_custom_flags_test test_name flags)
     set(temp_target "${EXECUTABLE}_${test_name}")
 
-    add_executable(${temp_target} ${SOURCES})
+    add_executable(${temp_target} ${C_SOURCES})
 
     target_compile_options(${temp_target} PRIVATE ${flags})
     target_link_options(${temp_target} PRIVATE ${flags} -lm)
@@ -75,4 +80,26 @@ add_test(NAME memcheck_valgrind
 )
 set_tests_properties(memcheck_valgrind PROPERTIES LABELS "profiling")
 
-include(CTest)
+#
+# Gtest
+#
+
+# Get gtest lib
+include(GoogleTest)
+find_library(GTEST_LIB gtest HINTS /usr/lib64)
+find_library(GTEST_MAIN_LIB gtest_main HINTS /usr/lib64)
+
+# Find all test files
+file(GLOB TEST_SOURCES ${CMAKE_SOURCE_DIR}/tests/performance/*.cpp)
+
+# Add executable for tests
+add_executable(test_mandelbrot ${TEST_SOURCES} ${C_SOURCES})
+
+# Add compile flags
+target_compile_options(test_mandelbrot PRIVATE ${COMPILE_FLAGS})
+
+# Link libs for tests
+target_link_libraries(test_mandelbrot ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
+target_link_options(test_mandelbrot PRIVATE -lm -lprofiler) # do I need this?
+
+gtest_discover_tests(test_mandelbrot TEST_PREFIX image)

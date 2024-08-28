@@ -4,20 +4,26 @@ cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Project name and version
-project(mandelbrot VERSION 0.1.0 LANGUAGES C)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include the header files
+# Project name and version
+project(mandelbrot VERSION 0.1.0 LANGUAGES C CXX)
+
+# Include header files
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# Find all the source files
-file(GLOB SOURCES "src/*.c")
+# Find all source files
+file(GLOB C_SOURCES "src/*.c")
+
+# Removing main.c because it would link to other executables
+list(REMOVE_ITEM C_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 
 # Set executable name
 set(EXECUTABLE "mandelbrot")
 
 # Add executable target
-add_executable(${EXECUTABLE} ${SOURCES})
+add_executable(${EXECUTABLE} ${C_SOURCES} "src/main.c")
 
 # Set sanitizer types
 set(SANITIZER_ADDRESS "-fsanitize=address")
@@ -27,20 +33,10 @@ set(SANITIZER_UNDEFINED "-fsanitize=undefined")
 # Include the tests
 include(Tests.cmake)
 
-# Get gtest lib
-find_library(GTEST_LIB gtest HINTS /usr/lib64)
-find_library(GTEST_MAIN_LIB gtest_main HINTS /usr/lib64)
-
-# Add executable for tests
-add_executable(test_mandelbrot ${CMAKE_SOURCE_DIR}/tests/performance/test_mandelbrot.c)
-# Link libs for tests
-target_link_libraries(test_mandelbrot ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
-target_link_options(test_mandelbrot PRIVATE -lm -lprofiler) # do I need this?
-
 #
 # Compile flags for any build type
 #
-add_compile_options(
+set(COMPILE_FLAGS
     -Wall
     -Wextra
     -pthread
@@ -53,6 +49,9 @@ add_compile_options(
     -pg
     -Wunreachable-code
 )
+
+# Add compile flags
+target_compile_options(${EXECUTABLE} PRIVATE ${COMPILE_FLAGS})
 
 # Link libs
 target_link_options(${EXECUTABLE} PRIVATE -lm -lprofiler)
@@ -78,7 +77,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 # Extra compile flags for debug build
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(${DEBUG_FLAGS})
-
+    # TODO: need to update assembly generation
     # Generate assembly file
     add_custom_target(generate_assembly
         COMMAND ${CMAKE_C_COMPILER} ${DEBUG_FLAGS} -S ${CMAKE_SOURCE_DIR}/src/mandelbrot.c -o ${CMAKE_CURRENT_BINARY_DIR}/assembly.s

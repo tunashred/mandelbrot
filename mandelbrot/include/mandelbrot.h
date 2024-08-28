@@ -1,6 +1,10 @@
 #ifndef MANDELBROT_H
 #define MANDELBROT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -32,12 +36,11 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
 typedef struct {
     const int* total_pixels;
     const int pixel_per_procent;
-    int current_pixel; // = 0
-    int current_procent; // = 1
+    int current_pixel;
+    int current_procent;
     int pixel_waypoint;
     const char* symbols;
     const int symbols_count;
-
 } progress_state;
 
 void progress_print(progress_state* progress);
@@ -57,5 +60,9 @@ void mandelbrot_around_center(
     int num_iters, double rotate_degrees, double brightness,
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

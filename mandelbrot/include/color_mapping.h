@@ -1,6 +1,10 @@
 #ifndef COLOR_MAPPING_H
 #define COLOR_MAPPING_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -56,5 +60,9 @@ int generate_color_palette(
     int (*green_func)(int, int),
     int (*blue_func)(int, int)
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
