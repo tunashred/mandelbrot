@@ -94,3 +94,4 @@ _deps
 **/build
 **/*.json
 **/tests/output
+**/.idea
