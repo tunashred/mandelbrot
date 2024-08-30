@@ -21,7 +21,6 @@ void mandelbrot_quintic(double z_real, double z_im, double c_real, double c_im, 
     *rez_im = 5 * pow(z_real, 4) * z_im - 10 * pow(z_real, 2) * pow(z_im, 3) + pow(z_im, 5) + c_im;
 }
 
-
 int diverge(double c_real, double c_im, int num_iters, void (*mandelbrot_func)(double, double, double, double, double*, double*)) {
     int i = 0;
     double z_real = 0, z_im = 0;
@@ -97,9 +96,8 @@ void deseneaza_mandelbrot(
     int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
 ) {
     color_palette palette;
-    double brightness_rate = 1;
 
-    if(generate_color_palette(&palette, brightness_rate, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
+    if(generate_color_palette(&palette, brightness, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
         return;
     }
 

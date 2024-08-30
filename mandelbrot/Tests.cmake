@@ -100,6 +100,6 @@ target_compile_options(test_mandelbrot PRIVATE ${COMPILE_FLAGS})
 
 # Link libs for tests
 target_link_libraries(test_mandelbrot ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
-target_link_options(test_mandelbrot PRIVATE -lm -lprofiler) # do I need this?
+target_link_options(test_mandelbrot PRIVATE -lm)
 
-gtest_discover_tests(test_mandelbrot TEST_PREFIX image)
+gtest_discover_tests(test_mandelbrot)
