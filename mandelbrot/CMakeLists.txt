@@ -19,13 +19,13 @@ file(GLOB C_SOURCES "src/*.c")
 set(MAIN_FILE_PATH "${CMAKE_SOURCE_DIR}/src/main.c")
 
 # Removing main.c because it would link to other executables
-list(REMOVE_ITEM C_SOURCES MAIN_FILE_PATH)
+list(REMOVE_ITEM C_SOURCES "${MAIN_FILE_PATH}")
 
 # Set executable name
 set(EXECUTABLE "mandelbrot")
 
 # Add executable target
-add_executable(${EXECUTABLE} ${C_SOURCES} "src/main.c")
+add_executable(${EXECUTABLE} ${C_SOURCES} ${MAIN_FILE_PATH})
 
 # Set sanitizer types
 set(SANITIZER_ADDRESS "-fsanitize=address")
@@ -33,7 +33,7 @@ set(SANITIZER_THREAD "-fsanitize=thread")
 set(SANITIZER_UNDEFINED "-fsanitize=undefined")
 
 # Include the tests
-include(Tests.cmake)
+include(${CMAKE_SOURCE_DIR}/tests/Tests.cmake)
 
 #
 # Compile flags for any build type
