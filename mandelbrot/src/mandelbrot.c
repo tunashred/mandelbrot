@@ -90,7 +90,7 @@ FILE* initialize_image(char* image_name, int height, int width) {
 }
 
 void deseneaza_mandelbrot(
-    char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real,
+    const char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real,
     double top_left_coord_imaginar, double pixel_width, int num_iters,
     double rotate_degrees, double brightness, int (*red_mapping_func)(int, int),
     int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
@@ -139,7 +139,7 @@ void deseneaza_mandelbrot(
 }
 
 void mandelbrot_around_center(
-    char *nume_poza, int inaltime_poza, int latime_poza,
+    const char *nume_poza, int inaltime_poza, int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
