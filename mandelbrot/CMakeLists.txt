@@ -48,7 +48,6 @@ set(COMPILE_FLAGS
     -Wwrite-strings
     -Wcast-qual
     -Wconversion
-    -pg
     -Wunreachable-code
 )
 
@@ -56,7 +55,7 @@ set(COMPILE_FLAGS
 target_compile_options(${EXECUTABLE} PRIVATE ${COMPILE_FLAGS})
 
 # Link libs
-target_link_options(${EXECUTABLE} PRIVATE -lm -lprofiler)
+target_link_options(${EXECUTABLE} PRIVATE -lm)
 
 # Release specific flags
 set(RELEASE_FLAGS

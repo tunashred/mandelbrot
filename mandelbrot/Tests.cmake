@@ -46,14 +46,17 @@ add_custom_flags_test("sanitizer_thread" ${SANITIZER_THREAD})
 #
 # CPU profiling test
 #
+add_executable(${EXECUTABLE}_profiler ${C_SOURCES} ${MAIN_FILE_PATH})
+target_link_options(${EXECUTABLE}_profiler PRIVATE -lm -lprofiler)
+
 add_custom_target(cpu_profiler_gperftools_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/cpu_profiler_gperftools.sh
-    "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
+    "${CMAKE_BINARY_DIR}/${EXECUTABLE}_profiler"
     "${CMAKE_BINARY_DIR}/mandelbrot.prof"
     "${LOGS_DIR}/cpu_profile_analysis.txt"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running CPU profiler test..."
-    DEPENDS ${EXECUTABLE}
+    DEPENDS ${EXECUTABLE}_profiler
 )
 
 add_test(NAME cpu_profiler_gperftools
