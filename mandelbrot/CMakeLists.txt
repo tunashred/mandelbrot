@@ -16,8 +16,10 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Find all source files
 file(GLOB C_SOURCES "src/*.c")
 
+set(MAIN_FILE_PATH "${CMAKE_SOURCE_DIR}/src/main.c")
+
 # Removing main.c because it would link to other executables
-list(REMOVE_ITEM C_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
+list(REMOVE_ITEM C_SOURCES MAIN_FILE_PATH)
 
 # Set executable name
 set(EXECUTABLE "mandelbrot")
