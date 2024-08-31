@@ -40,8 +40,13 @@ endfunction()
 # Sanitizer release tests
 #
 add_custom_flags_test("sanitizer_address" ${SANITIZER_ADDRESS})
+set_tests_properties(sanitizer_address PROPERTIES LABELS "sanitizers")
+
 add_custom_flags_test("sanitizer_undefined" ${SANITIZER_UNDEFINED})
+set_tests_properties(sanitizer_undefined PROPERTIES LABELS "sanitizers")
+
 add_custom_flags_test("sanitizer_thread" ${SANITIZER_THREAD})
+set_tests_properties(sanitizer_thread PROPERTIES LABELS "sanitizers")
 
 #
 # CPU profiling test
