@@ -17,7 +17,7 @@ set(SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/tests/scripts)
 function(add_custom_flags_test test_name flags)
     set(temp_target "${EXECUTABLE}_${test_name}")
 
-    add_executable(${temp_target} ${C_SOURCES})
+    add_executable(${temp_target} ${C_SOURCES} ${MAIN_FILE_PATH})
 
     target_compile_options(${temp_target} PRIVATE ${flags})
     target_link_options(${temp_target} PRIVATE ${flags} -lm)
