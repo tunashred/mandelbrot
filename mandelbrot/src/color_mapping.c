@@ -116,9 +116,9 @@ int generate_color_palette(
                 fprintf(stderr, "Incomplete palette file\n");
                 return EXIT_FAILURE;
             }
-            palette->rgb[i][0] = fmin(1499, palette->r[i] * brightness_rate);
-            palette->rgb[i][1] = fmin(1499, palette->g[i] * brightness_rate);
-            palette->rgb[i][2] = fmin(1499, palette->b[i] * brightness_rate);
+            palette->rgb[i][0] = (int) fmin(1499, (double)palette->r[i] * brightness_rate);
+            palette->rgb[i][1] = (int) fmin(1499, (double)palette->g[i] * brightness_rate);
+            palette->rgb[i][2] = (int) fmin(1499, (double)palette->b[i] * brightness_rate);
         }
         fclose(file);
         return EXIT_SUCCESS;
@@ -133,9 +133,9 @@ int generate_color_palette(
         palette->g[i] = green(i, NUM_COLORS, green_func);
         palette->b[i] = blue(i, NUM_COLORS, blue_func);
 
-        palette->rgb[i][0] = fmin(1499, palette->r[i] * brightness_rate);
-        palette->rgb[i][1] = fmin(1499, palette->g[i] * brightness_rate);
-        palette->rgb[i][2] = fmin(1499, palette->b[i] * brightness_rate);
+        palette->rgb[i][0] = (int) fmin(1499, (double)palette->r[i] * brightness_rate);
+        palette->rgb[i][1] = (int) fmin(1499, (double)palette->g[i] * brightness_rate);
+        palette->rgb[i][2] = (int) fmin(1499, (double)palette->b[i] * brightness_rate);
     }
     return EXIT_SUCCESS;
 }
