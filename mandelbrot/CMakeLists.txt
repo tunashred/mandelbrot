@@ -71,6 +71,16 @@ set(DEBUG_FLAGS
     -fanalyzer
 )
 
+function(generate_assembly_for_file SRC_FILE)
+    # Get file name without extension
+    get_filename_component(FILE_NAME ${SRC_FILE} NAME_WE)
+    add_custom_target(
+        ${FILE_NAME}_assembly
+        COMMAND ${CMAKE_C_COMPILER} ${DEBUG_FLAGS} -I${CMAKE_SOURCE_DIR}/include -S ${SRC_FILE} -o ${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.s
+        COMMENT "Generating assembly file for ${FILE_NAME}.c"
+    )
+endfunction()
+
 # Extra compile flags for release build
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(${RELEASE_FLAGS})
@@ -78,14 +88,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 # Extra compile flags for debug build
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(${DEBUG_FLAGS})
-    # TODO: need to update assembly generation
-    # Generate assembly file
-    add_custom_target(generate_assembly
-        COMMAND ${CMAKE_C_COMPILER} ${DEBUG_FLAGS} -S ${CMAKE_SOURCE_DIR}/src/mandelbrot.c -o ${CMAKE_CURRENT_BINARY_DIR}/assembly.s
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${EXECUTABLE}
-        COMMENT "Generating assembly file assembly.s"
-    )
+
+    # Generate assembly files
+    foreach(SRC_FILE IN LISTS C_SOURCES)
+        generate_assembly_for_file(${SRC_FILE})
+    endforeach()
 endif()
 
 ##################################################################
@@ -117,6 +124,3 @@ endif()
 # -fverbose-asm: Puts extra comments to generated assembly code to make it more readable
 # -finstrument-functions: Inserts hooks for each function in the program
 # -fanalyzer: Static analyser at compile time
-#
-# Sanitizers:
-# ${SANITIZER}: Applied sanitizer (address, thread, undefined). Needs to be manually changed because only one sanitizer can be used in a build.
