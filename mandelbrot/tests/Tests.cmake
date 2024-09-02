@@ -40,13 +40,13 @@ endfunction()
 # Sanitizer release tests
 #
 add_custom_flags_test("sanitizer_address" ${SANITIZER_ADDRESS})
-set_tests_properties(sanitizer_address PROPERTIES LABELS "sanitizers")
+set_tests_properties(sanitizer_address PROPERTIES LABELS "sanitizers;sanitizer_address")
 
 add_custom_flags_test("sanitizer_undefined" ${SANITIZER_UNDEFINED})
-set_tests_properties(sanitizer_undefined PROPERTIES LABELS "sanitizers")
+set_tests_properties(sanitizer_undefined PROPERTIES LABELS "sanitizers;sanitizer_undefined")
 
 add_custom_flags_test("sanitizer_thread" ${SANITIZER_THREAD})
-set_tests_properties(sanitizer_thread PROPERTIES LABELS "sanitizers")
+set_tests_properties(sanitizer_thread PROPERTIES LABELS "sanitizers;sanitizer_thread")
 
 #
 # CPU profiling test
@@ -68,7 +68,7 @@ add_test(NAME cpu_profiler_gperftools
     COMMAND ${CMAKE_COMMAND} --build . --target cpu_profiler_gperftools_script
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
-set_tests_properties(cpu_profiler_gperftools PROPERTIES LABELS "profiling")
+set_tests_properties(cpu_profiler_gperftools PROPERTIES LABELS "profiling;cpu_profiler_gperftools")
 
 #
 # Memcheck profiling test
@@ -86,13 +86,11 @@ add_test(NAME memcheck_valgrind
     COMMAND ${CMAKE_COMMAND} --build . --target memcheck_valgrind_script
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
-set_tests_properties(memcheck_valgrind PROPERTIES LABELS "profiling")
+set_tests_properties(memcheck_valgrind PROPERTIES LABELS "profiling;valgrind_memcheck")
 
 #
 # Stack usage profiling test
 #
-
-# Collect all .su files in the build directory
 file(GLOB STACK_USAGE_FILES "${CMAKE_BINARY_DIR}/CMakeFiles/mandelbrot.dir/src/*.su")
 
 add_custom_target(stack_usage_script
@@ -105,7 +103,7 @@ add_test(NAME stack_usage
     COMMAND ${CMAKE_COMMAND} --build . --target stack_usage_script
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
-set_tests_properties(stack_usage PROPERTIES LABELS "stack_usage")
+set_tests_properties(stack_usage PROPERTIES LABELS "profiling;stack_usage")
 
 #
 # Gtest
