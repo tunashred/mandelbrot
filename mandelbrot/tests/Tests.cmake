@@ -89,6 +89,25 @@ add_test(NAME memcheck_valgrind
 set_tests_properties(memcheck_valgrind PROPERTIES LABELS "profiling")
 
 #
+# Stack usage profiling test
+#
+
+# Collect all .su files in the build directory
+file(GLOB STACK_USAGE_FILES "${CMAKE_BINARY_DIR}/CMakeFiles/mandelbrot.dir/src/*.su")
+
+add_custom_target(stack_usage_script
+    COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/stack_usage.sh ${STACK_USAGE_FILES}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Getting stack usage info from .su files..."
+)
+
+add_test(NAME stack_usage
+    COMMAND ${CMAKE_COMMAND} --build . --target stack_usage_script
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+set_tests_properties(stack_usage PROPERTIES LABELS "stack_usage")
+
+#
 # Gtest
 #
 

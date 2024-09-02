@@ -49,6 +49,7 @@ set(COMPILE_FLAGS
     -Wcast-qual
     -Wconversion
     -Wunreachable-code
+    -fstack-usage
 )
 
 # Add compile flags
@@ -109,6 +110,7 @@ endif()
 # -Wcast-qual: Warns when casting removes type qualifiers such as const or volatile
 # -Wconversion: Warns about implicit type conversions that can lead to data loss
 # -Wunreachable-code: Detects code that will never be executed
+# -fstack-usage: Generates .su files for each source file which contains stack usage info of each function
 #
 # Link flags
 # -lm: needed for math.h
