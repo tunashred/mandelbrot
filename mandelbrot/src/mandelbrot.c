@@ -80,9 +80,13 @@ void progress_print(progress_state* progress) {
     }
 }
 
-FILE* initialize_image(char* image_name, int height, int width) {
+FILE* initialize_image(const char* image_name, int height, int width) {
     FILE* pgimg;
     pgimg = fopen(image_name, "wb");
+    if(pgimg == NULL) {
+        fprintf(stderr, "Error initializing image\n");
+        return NULL;
+    }
     fprintf(pgimg, "P3\n"); 
     fprintf(pgimg, "%d %d\n", width, height);
     fprintf(pgimg, "255\n");
@@ -102,6 +106,9 @@ void deseneaza_mandelbrot(
     }
 
     FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
+    if(pgimg == NULL) {
+        return;
+    }
 
     int numar_pixeli = inaltime_poza * latime_poza;
     progress_state progress = (progress_state) {

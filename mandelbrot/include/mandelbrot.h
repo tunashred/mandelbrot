@@ -45,7 +45,7 @@ typedef struct {
 
 void progress_print(progress_state* progress);
 
-FILE* initialize_image(char* image_name, int height, int width);
+FILE* initialize_image(const char* image_name, int height, int width);
 
 void deseneaza_mandelbrot(
     const char* nume_poza, int inaltime_poza, int latime_poza,
