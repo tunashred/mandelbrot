@@ -42,7 +42,6 @@ set(COMPILE_FLAGS
     -Wall
     -Wextra
     -pthread
-    -D_FORTIFY_SOURCE=2
     -Wshadow
     -Wcast-align
     -Wwrite-strings
@@ -60,6 +59,7 @@ target_link_options(${EXECUTABLE} PRIVATE -lm)
 
 # Release specific flags
 set(RELEASE_FLAGS
+    -D_FORTIFY_SOURCE=2
     -O3
 )
 
@@ -102,7 +102,6 @@ endif()
 # Common flags
 # -Wall: Enable all warnings
 # -pthread: Enable pthread support
-# -D_FORTIFY_SOURCE=2: Runtime buffer overflow detection
 # -Wshadow: Warns if a local variable shadows a function parameter or global variable, or when a lib function is shadowed
 # -Wpointer-arith: Warns about questionable pointer operations or pointer arithmetic with void* type or function pointers
 # -Wcast-align: Warns for potentially unsafe pointer casts related to strict pointer alignment
@@ -118,6 +117,7 @@ endif()
 # -lprofiler: For gperftools
 #
 # Release flags
+# -D_FORTIFY_SOURCE=2: Runtime buffer overflow detection
 # -O3: Max optimization level
 #
 # Debug flags
