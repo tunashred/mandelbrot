@@ -81,7 +81,7 @@ add_custom_target(memcheck_valgrind_script
     COMMENT "Running Valgrind Memcheck..."
     DEPENDS ${EXECUTABLE}
 )
-
+# TODO: Add asserts to the output? Add 'WILL_FAIL' property?
 add_test(NAME memcheck_valgrind
     COMMAND ${CMAKE_COMMAND} --build . --target memcheck_valgrind_script
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -128,3 +128,7 @@ target_link_libraries(test_mandelbrot ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
 target_link_options(test_mandelbrot PRIVATE -lm)
 
 gtest_discover_tests(test_mandelbrot DISCOVERY_TIMEOUT 10)
+
+add_test(NAME performance_tests_mandatory
+    COMMAND test_mandelbrot --gtest_color=yes --gtest_filter=-*extra*
+)
