@@ -74,7 +74,7 @@ def compare_results(baseline_data, results, baseline_filename, threshold_percent
     return comparison_results
 
 
-def write_results_to_csv(results_file, results, baseline_data, append=False):
+def write_results_to_csv(results_file, results, baseline_data, threshold_percentage, append=False):
     timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]  # Current timestamp with milliseconds
 
     file_mode = 'a' if append else 'w'
@@ -94,12 +94,18 @@ def write_results_to_csv(results_file, results, baseline_data, append=False):
         for test_name, (exec_time, suite_name) in results.items():
             result = 'completed'
             regression = ''
-            if test_name not in baseline_data:
-                regression = 'REGRESSION'
-            else:
-                expected_time = baseline_data[test_name]
-                if exec_time != expected_time:
+            expected_time = baseline_data.get(test_name)
+
+            if expected_time is not None:
+                threshold = expected_time * (threshold_percentage / 100)
+                if exec_time < expected_time:
+                    regression = 'NICE'
+                elif exec_time <= expected_time + threshold:
+                    regression = 'OK'
+                else:
                     regression = 'REGRESSION'
+            else:
+                regression = 'REGRESSION'
 
             writer.writerow({
                 'Test Suite': suite_name,
@@ -140,19 +146,21 @@ def main():
         print(f"{RED}Error parsing results XML: {e}{RESET}")
         sys.exit(1)
 
+    # Compare results and print to console
     comparison_results = compare_results(baseline_data, results, baseline_filename, threshold_percentage)
     for line in comparison_results:
         print(line)
 
+    # Ask the user if they want to append the results to the CSV
     append_data = input("Do you want to append the results to the existing file? (y/n): ").strip().lower()
     if append_data == 'y':
-        write_results_to_csv(output_csv, results, baseline_data, append=True)
-
-
+        # Write the results to the CSV with threshold consideration
+        write_results_to_csv(output_csv, results, baseline_data, threshold_percentage, append=True)
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print(f"{RED}Usage: {sys.argv[0]} <baseline_file> <results_file> <output_csv>{RESET}")
+        print(f"{RED}Usage: {sys.argv[0]} <baseline_file> <results_file> <output_csv> <optional: threshold percent>{RESET}")
         sys.exit(1)
 
     main()
+
