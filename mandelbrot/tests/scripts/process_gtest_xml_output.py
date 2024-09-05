@@ -11,8 +11,8 @@ from pathlib import Path
 RED = '\033[91m'
 GREEN = '\033[92m'
 BLUE = '\033[94m'
+YELLOW = '\033[93m'
 RESET = '\033[0m'
-
 
 def load_baseline(file_path):
     """Load the baseline data from the specified CSV file."""
@@ -44,7 +44,8 @@ def parse_gtest_xml(xml_path):
     return results, test_suites
 
 
-def compare_results(baseline_data, results, baseline_filename):
+def compare_results(baseline_data, results, baseline_filename, threshold_percentage):
+    """Compare the results against the baseline with a given threshold and return comparison outcomes."""
     comparison_results = []
     test_suites_reported = set()
 
@@ -57,9 +58,13 @@ def compare_results(baseline_data, results, baseline_filename):
 
         expected_time = baseline_data.get(test_name)
         if expected_time is not None:
-            if new_time == expected_time:
+            threshold = expected_time * (threshold_percentage / 100)
+            if new_time < expected_time:
                 comparison_results.append(
                     f"Comparing {test_name} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {GREEN}(NICE){RESET}")
+            elif new_time <= expected_time + threshold:
+                comparison_results.append(
+                    f"Comparing {test_name} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {YELLOW}(OK){RESET}")
             else:
                 comparison_results.append(
                     f"Comparing {test_name} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {RED}(REGRESSION){RESET}")
@@ -111,12 +116,14 @@ def main():
     parser.add_argument('baseline_file', type=str, help='Path to the baseline CSV file')
     parser.add_argument('results_file', type=str, help='Path to the gtest XML output file')
     parser.add_argument('output_csv', type=str, help='Path to the output results CSV file')
+    parser.add_argument('--threshold', type=float, default=10.0, help='Percentage threshold for acceptable time difference')
 
     args = parser.parse_args()
 
     baseline_file = args.baseline_file
     results_file = args.results_file
     output_csv = args.output_csv
+    threshold_percentage = args.threshold
 
     # Extract the baseline filename without extension
     baseline_filename = Path(baseline_file).stem
@@ -133,13 +140,14 @@ def main():
         print(f"{RED}Error parsing results XML: {e}{RESET}")
         sys.exit(1)
 
-    comparison_results = compare_results(baseline_data, results, baseline_filename)
+    comparison_results = compare_results(baseline_data, results, baseline_filename, threshold_percentage)
     for line in comparison_results:
         print(line)
 
     append_data = input("Do you want to append the results to the existing file? (y/n): ").strip().lower()
     if append_data == 'y':
         write_results_to_csv(output_csv, results, baseline_data, append=True)
+
 
 
 if __name__ == "__main__":
