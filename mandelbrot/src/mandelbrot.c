@@ -94,7 +94,7 @@ FILE* initialize_image(const char* image_name, const int height, const int width
     pgimg = fopen(image_name, "wb");
     if(pgimg == NULL) {
         fprintf(stderr, "Error initializing image\n");
-        return NULL;
+        exit(EXIT_FAILURE);
     }
     fprintf(pgimg, "P3\n"); 
     fprintf(pgimg, "%d %d\n", width, height);
