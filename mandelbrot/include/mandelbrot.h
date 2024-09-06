@@ -1,6 +1,7 @@
 #ifndef MANDELBROT_H
 #define MANDELBROT_H
 
+#include "color_mapping.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,17 +49,18 @@ void progress_print(progress_state* progress);
 FILE* initialize_image(const char* image_name, int height, int width);
 
 void deseneaza_mandelbrot(
-    const char* nume_poza, int inaltime_poza, int latime_poza,
+    FILE* pgimg, int inaltime_poza, int latime_poza,
     double top_left_coord_real, double top_left_coord_imaginar, double pixel_width,
-    int num_iters, double rotate_degrees, double brightness,
-    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+    int num_iters, double rotate_degrees, color_palette* palette,
+    void (*mandelbrot_func)(double, double, double, double, double*, double*)
 );
 
 void mandelbrot_around_center(
     const char* nume_poza, int inaltime_poza, int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
-    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
+    void (*mandelbrot_func)(double, double, double, double, double*, double*)
 );
 
 #ifdef __cplusplus

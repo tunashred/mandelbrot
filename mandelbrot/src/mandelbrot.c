@@ -103,22 +103,11 @@ FILE* initialize_image(const char* image_name, int height, int width) {
 }
 
 void deseneaza_mandelbrot(
-    const char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real,
+    FILE* pgimg, int inaltime_poza, int latime_poza, double top_left_coord_real,
     double top_left_coord_imaginar, double pixel_width, int num_iters,
-    double rotate_degrees, double brightness, int (*red_mapping_func)(int, int),
-    int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+    double rotate_degrees, color_palette* palette, 
+    void (*mandelbrot_func)(double, double, double, double, double*, double*)
 ) {
-    color_palette palette;
-
-    if(generate_color_palette(&palette, brightness, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
-        return;
-    }
-
-    FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
-    if(pgimg == NULL) {
-        return;
-    }
-
     int numar_pixeli = inaltime_poza * latime_poza;
     progress_state progress = (progress_state) {
         .total_pixels = &numar_pixeli,
@@ -138,11 +127,11 @@ void deseneaza_mandelbrot(
                    im_rotit   = parte_imaginara;
             roteste(&real_rotit, &im_rotit, -0.75, 0, rotate_degrees);
             
-            int iter_count = diverge(real_rotit, im_rotit, num_iters, mandelbrot_quadratic);
+            int iter_count = diverge(real_rotit, im_rotit, num_iters, mandelbrot_func);
             fprintf(pgimg, "%d %d %d\n",
-                    palette.r[palette.rgb[iter_count][0]],
-                    palette.g[palette.rgb[iter_count][1]],
-                    palette.b[palette.rgb[iter_count][2]]
+                    palette->r[palette->rgb[iter_count][0]],
+                    palette->g[palette->rgb[iter_count][1]],
+                    palette->b[palette->rgb[iter_count][2]]
             );
             parte_reala += pixel_width;
 
@@ -158,17 +147,25 @@ void mandelbrot_around_center(
     const char *nume_poza, int inaltime_poza, int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
-    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
+    void (*mandelbrot_func)(double, double, double, double, double*, double*)
 ) {
-    int latura_scurta =             (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
-    double pixel_width =             radius * 2 / latura_scurta;
-    double top_left_coord_real =     center_coord_real - (double)latime_poza / 2 * pixel_width;
+    int latura_scurta              = (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
+    double pixel_width             = radius * 2 / latura_scurta;
+    double top_left_coord_real     = center_coord_real - (double)latime_poza / 2 * pixel_width;
     double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
-    deseneaza_mandelbrot(
-        nume_poza, inaltime_poza, latime_poza,
-        top_left_coord_real, top_left_coord_imaginar, pixel_width,
-        num_iters, rotate_degrees, brightness,
+    FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
+
+    color_palette palette;
+    generate_color_palette(
+        &palette, brightness, NULL,
         red_mapping_func, green_mapping_func, blue_mapping_func
+    );
+
+    deseneaza_mandelbrot(
+        pgimg, inaltime_poza, latime_poza, top_left_coord_real,
+        top_left_coord_imaginar, pixel_width, num_iters,
+        rotate_degrees, &palette, mandelbrot_func
     );
 }

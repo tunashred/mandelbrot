@@ -95,7 +95,7 @@ int blue(int iter_count, int num_iters, int (*color_mapping_func)(int, int)) {
     return color_mapping_func(iter_count, num_iters);
 }
 
-int generate_color_palette(
+void generate_color_palette(
         color_palette* palette,
         double brightness_rate,
         const char* palette_file,
@@ -108,24 +108,24 @@ int generate_color_palette(
         FILE* file = fopen(palette_file, "r");
         if(!file) {
             fprintf(stderr, "Couldn't open the file: %s\n", palette_file);
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
         
         for(int i = 0; i < NUM_COLORS; i++) {
             if(fscanf(file, "%d %d %d", &palette->r[i], &palette->g[i], &palette->b[i]) != 3) {
                 fprintf(stderr, "Incomplete palette file\n");
-                return EXIT_FAILURE;
+                exit(EXIT_FAILURE);
             }
             palette->rgb[i][0] = (int) fmin(1499, (double)palette->r[i] * brightness_rate);
             palette->rgb[i][1] = (int) fmin(1499, (double)palette->g[i] * brightness_rate);
             palette->rgb[i][2] = (int) fmin(1499, (double)palette->b[i] * brightness_rate);
         }
         fclose(file);
-        return EXIT_SUCCESS;
+        return;
     }
     if (!red_func || !green_func || !blue_func) {
         fprintf(stderr, "Please provide all color mapping functions\n");
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     // Case 2: Generate using given color mapping functions
     for(int i = 0; i < NUM_COLORS; i++) {
@@ -137,5 +137,4 @@ int generate_color_palette(
         palette->rgb[i][1] = (int) fmin(1499, (double)palette->g[i] * brightness_rate);
         palette->rgb[i][2] = (int) fmin(1499, (double)palette->b[i] * brightness_rate);
     }
-    return EXIT_SUCCESS;
 }
