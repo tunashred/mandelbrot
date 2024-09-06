@@ -46,17 +46,17 @@ typedef struct {
 
 void progress_print(progress_state* progress);
 
-FILE* initialize_image(const char* image_name, int height, int width);
+FILE* initialize_image(const char* image_name, const int height, const int width);
 
 void deseneaza_mandelbrot(
-    FILE* pgimg, int inaltime_poza, int latime_poza,
+    FILE* pgimg, const int inaltime_poza, const int latime_poza,
     double top_left_coord_real, double top_left_coord_imaginar, double pixel_width,
-    int num_iters, double rotate_degrees, color_palette* palette,
+    int num_iters, double rotate_degrees, const color_palette* palette,
     void (*mandelbrot_func)(double, double, double, double, double*, double*)
 );
 
 void mandelbrot_around_center(
-    const char* nume_poza, int inaltime_poza, int latime_poza,
+    const char* nume_poza, const int inaltime_poza, const int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),

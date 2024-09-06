@@ -4,8 +4,8 @@
 #include <color_mapping.h>
 
 int main() {
-    float scale = 1;
-    int height_landscape = (int) (1080 * scale),
+    const float scale = 1;
+    const int height_landscape = (int) (1080 * scale),
     width_landscape      = (int) (1920.f * scale),
     height_portrait      = (int) (1080 * scale),
     width_portrait       = (int) (1080 * 1.2 * scale);
@@ -26,7 +26,7 @@ int main() {
         "stuff.ppm", height_portrait, width_portrait, -0.7, -0.26, 0.01, 1500, 0, 1, sin_x_la_4,
         unu_minus_unu_pe_x, x_patrat_0_1_to_0_2, mandelbrot_quadratic);
     
-    mandelbrot_around_center( // legacy name: "pene_de_paun"
+    mandelbrot_around_center( // legacy name: pene_de_paun
         "galaxy.ppm", height_portrait, width_portrait, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035,
         1500, 0, 0.3, sin_x_la_4, unu_minus_unu_pe_x, x_patrat_0_1_to_0_2, mandelbrot_quadratic);
 
