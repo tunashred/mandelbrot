@@ -13,7 +13,6 @@ set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/scripts)
 
 # Function to add custom flags to a build
 # It builds the project, runs it and then deletes the executable
-# Only for test purposes
 function(add_custom_flags_test test_name flags)
     set(temp_target "${EXECUTABLE}_${test_name}")
 

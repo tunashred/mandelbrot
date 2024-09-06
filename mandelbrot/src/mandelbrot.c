@@ -70,10 +70,19 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
     *imaginar = sin(radiani) * raza + centru_im;
 }
 
-// TODO: variable number of dots at loading and fix dangling symbol when 100% is reached
 void progress_print(progress_state* progress) {
     if(progress->current_pixel++ == progress->pixel_waypoint) {
-        printf("%d%% complete... %c\r", progress->current_procent, progress->symbols[progress->current_procent % progress->symbols_count]);
+        int num_dots = progress->current_procent % 4;
+        int num_spaces = 3 - num_dots;
+
+        printf("\r\033[K%d%% complete %.*s%*s %c", 
+            progress->current_procent, 
+            num_dots, 
+            "...",
+            num_spaces,
+            "",
+            progress->symbols[progress->current_procent % progress->symbols_count]
+        );
         fflush(stdout);
         progress->pixel_waypoint += progress->pixel_per_procent;
         progress->current_procent++;
@@ -115,10 +124,10 @@ void deseneaza_mandelbrot(
         .total_pixels = &numar_pixeli,
         .pixel_per_procent = numar_pixeli / 100,
         .current_pixel = 0,
-        .current_procent = 1,
+        .current_procent = 0,
         .pixel_waypoint = 0,
-        .symbols = "/-\\",
-        .symbols_count = 3
+        .symbols = "|/-\\",
+        .symbols_count = 4
     };
 
     double parte_imaginara = top_left_coord_imaginar;
