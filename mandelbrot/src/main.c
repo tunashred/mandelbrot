@@ -6,9 +6,9 @@
 int main() {
     const float scale = 1;
     const int height_landscape = (int) (1080 * scale),
-    width_landscape      = (int) (1920.f * scale),
-    height_portrait      = (int) (1080 * scale),
-    width_portrait       = (int) (1080 * 1.2 * scale);
+    width_landscape            = (int) (1920.f * scale),
+    height_portrait            = (int) (1080 * scale),
+    width_portrait             = (int) (1080 * 1.2 * scale);
     
     mandelbrot_around_center(
         "mandelbrot.ppm", height_landscape, width_landscape, -0.43, -0.1, 1, 1500, 0, 1, sin_x_la_4,

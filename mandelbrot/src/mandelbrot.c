@@ -150,10 +150,10 @@ void mandelbrot_around_center(
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
     void (*mandelbrot_func)(double, double, double, double, double*, double*)
 ) {
-    int latura_scurta              = (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
-    double pixel_width             = radius * 2 / latura_scurta;
-    double top_left_coord_real     = center_coord_real - (double)latime_poza / 2 * pixel_width;
-    double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
+    const int latura_scurta              = (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
+    const double pixel_width             = radius * 2 / latura_scurta;
+    const double top_left_coord_real     = center_coord_real - (double)latime_poza / 2 * pixel_width;
+    const double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
     FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
 
@@ -163,7 +163,28 @@ void mandelbrot_around_center(
         red_mapping_func, green_mapping_func, blue_mapping_func
     );
 
-    deseneaza_mandelbrot(
+    image_info image_info = {
+        .image = pgimg,
+        .mandelbrot_func = mandelbrot_func,
+        .height = &inaltime_poza,
+        .width = &latime_poza,
+        .top_left_coord_real = &top_left_coord_real,
+        .top_left_coord_im = &top_left_coord_imaginar,
+        .pixel_width = &pixel_width,
+        .rotate_degrees = &rotate_degrees,
+        .num_iters = &num_iters
+    };
+
+    const int thread_count = 4;
+    pthread_t threads[thread_count];
+    worker_task_info workers_info[thread_count];
+    for(int i = 0; i < thread_count; i++) {
+        workers_info[thread_count].palette = &palette;
+        workers_info[thread_count].image_info = &image_info;
+        
+        // pthread_create(&threads[i], NULL, )
+    }
+       deseneaza_mandelbrot(
         pgimg, inaltime_poza, latime_poza, top_left_coord_real,
         top_left_coord_imaginar, pixel_width, num_iters,
         rotate_degrees, &palette, mandelbrot_func

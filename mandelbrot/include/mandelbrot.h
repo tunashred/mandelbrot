@@ -9,6 +9,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <pthread.h>
 
 // calculeaza f꜀(z) = z² + c
 void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
@@ -47,6 +48,31 @@ typedef struct {
 void progress_print(progress_state* progress);
 
 FILE* initialize_image(const char* image_name, const int height, const int width);
+
+typedef struct {
+    FILE* image;
+    void (*mandelbrot_func)(double, double, double, double, double*, double*);
+    const int* height;
+    const int* width;
+    const double* top_left_coord_real;
+    const double* top_left_coord_im;
+    const double* pixel_width;
+    const double* rotate_degrees;
+    const int* num_iters;
+} image_info;
+
+typedef struct {
+    int start_height;
+    int end_height;
+    int start_width;
+    int end_width;
+} image_slice;
+
+typedef struct {
+    color_palette* palette;
+    image_info* image_info;
+    image_slice image_slice;
+} worker_task_info;
 
 void deseneaza_mandelbrot(
     FILE* pgimg, const int inaltime_poza, const int latime_poza,
