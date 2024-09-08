@@ -74,12 +74,7 @@ typedef struct {
     image_slice image_slice;
 } worker_task_info;
 
-void deseneaza_mandelbrot(
-    FILE* pgimg, const int inaltime_poza, const int latime_poza,
-    double top_left_coord_real, double top_left_coord_imaginar, double pixel_width,
-    int num_iters, double rotate_degrees, const color_palette* palette,
-    void (*mandelbrot_func)(double, double, double, double, double*, double*)
-);
+void* deseneaza_mandelbrot(void* worker_task);
 
 void mandelbrot_around_center(
     const char* nume_poza, const int inaltime_poza, const int latime_poza,
