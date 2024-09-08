@@ -1,7 +1,6 @@
 #ifndef MANDELBROT_H
 #define MANDELBROT_H
 
-#include "color_mapping.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,6 +9,8 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <pthread.h>
+
+#include "color_mapping.h"
 
 // calculeaza f꜀(z) = z² + c
 void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
@@ -50,7 +51,6 @@ void progress_print(progress_state* progress);
 FILE* initialize_image(const char* image_name, const int height, const int width);
 
 typedef struct {
-    FILE* image;
     void (*mandelbrot_func)(double, double, double, double, double*, double*);
     const int* height;
     const int* width;
@@ -64,6 +64,7 @@ typedef struct {
 typedef struct {
     int start_height;
     int end_height;
+    double slice_top_left_coor_im;
     int start_width;
     int end_width;
 } image_slice;
@@ -72,9 +73,14 @@ typedef struct {
     color_palette* palette;
     image_info* image_info;
     image_slice image_slice;
+    int** buffer;
 } worker_task_info;
 
 void* deseneaza_mandelbrot(void* worker_task);
+
+int** buffer_init(int rows, int columns);
+
+void free_buffer(int** buffer, int rows);
 
 void mandelbrot_around_center(
     const char* nume_poza, const int inaltime_poza, const int latime_poza,
@@ -83,6 +89,7 @@ void mandelbrot_around_center(
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
     void (*mandelbrot_func)(double, double, double, double, double*, double*)
 );
+
 
 #ifdef __cplusplus
 }

@@ -105,7 +105,8 @@ FILE* initialize_image(const char* image_name, const int height, const int width
 
 void* deseneaza_mandelbrot(void* worker_task) {
     worker_task_info* task = (worker_task_info*) worker_task;
-    const int numar_pixeli = *(task.image_info->height) * *(task.image_info->width);
+    // TODO: add it as a image_info var
+    const int numar_pixeli = *(task->image_info->height) * *(task->image_info->width);
     progress_state progress = (progress_state) {
         .total_pixels = &numar_pixeli,
         .pixel_per_procent = numar_pixeli / 100,
@@ -117,31 +118,51 @@ void* deseneaza_mandelbrot(void* worker_task) {
     };
 
     // this is different for each worker
-    double parte_imaginara = *task->image_info->top_left_coord_im;
+    double parte_imaginara = task->image_slice.slice_top_left_coor_im;
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
         // this is different for each worker
         double parte_reala = *task->image_info->top_left_coord_real;
-        for(int j = 0; j < *(task->image_info->width); j++) {
+        for(int j = task->image_slice.start_width; j < task->image_slice.end_width; j++) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
-            roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
-            
+
+            // roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
+            int index = (i * *task->image_info->width) + j;
             int iter_count = diverge(real_rotit, im_rotit, *task->image_info->num_iters, task->image_info->mandelbrot_func);
             // print inside a matrix
-            fprintf(pgimg, "%d %d %d\n",
-                    task->palette->r[task->palette->rgb[iter_count][0]],
-                    task->palette->g[task->palette->rgb[iter_count][1]],
-                    task->palette->b[task->palette->rgb[iter_count][2]]
-            );
+            task->buffer[index][0] = task->palette->r[task->palette->rgb[iter_count][0]];
+            task->buffer[index][1] = task->palette->g[task->palette->rgb[iter_count][1]];
+            task->buffer[index][2] = task->palette->b[task->palette->rgb[iter_count][2]];
+
+            // printf("%d %d %d\n",
+            // task->palette->r[task->palette->rgb[iter_count][0]],
+            // task->palette->g[task->palette->rgb[iter_count][1]],
+            // task->palette->b[task->palette->rgb[iter_count][2]]);
+
             parte_reala += *task->image_info->pixel_width;
 
-            progress_print(&progress);
+            // progress_print(&progress);
         }
-        fprintf(pgimg, "\n");
         parte_imaginara -= *task->image_info->pixel_width;
     }
-
     return NULL;
+}
+
+int** buffer_init(int rows, int columns) {
+    int** buffer = (int**) malloc(rows * sizeof(int*));
+    for(int i = 0; i < rows; i++) {
+        buffer[i] = (int*) malloc(columns * sizeof(int)); 
+    }
+    return buffer;
+}
+
+void free_buffer(int** buffer, int rows) {
+    for(int i = 0; i < rows; i++) {
+        free(buffer[i]);
+        buffer[i] = NULL;
+    }
+    free(buffer);
+    buffer = NULL;
 }
 
 void mandelbrot_around_center(
@@ -165,7 +186,6 @@ void mandelbrot_around_center(
     );
 
     image_info image_info = {
-        .image               = pgimg,
         .mandelbrot_func     = mandelbrot_func,
         .height              = &inaltime_poza,
         .width               = &latime_poza,
@@ -175,17 +195,33 @@ void mandelbrot_around_center(
         .rotate_degrees      = &rotate_degrees,
         .num_iters           = &num_iters
     };
+    
+    // replace the magic number with a var
+    int** buffer = buffer_init(latime_poza * inaltime_poza, 3);
 
-    const uint64_t thread_count = 4;
-    start_worker_threads(&thread_count, &palette, &image_info);
+    const uint64_t thread_count = 2;
+    start_worker_threads(&thread_count, &palette, &image_info, buffer);
 
     wait_all_threads();
 
+    // for(int i = 0; i < latime_poza * inaltime_poza; i++) {
+    //         fprintf(stdout, "%d %d %d\n",
+    //         buffer[i][0],
+    //         buffer[i][1],
+    //         buffer[i][2]
+    //     );
+    // }
+
     // print the image
-    fprintf(pgimg, "%d %d %d\n",
-        palette.r[palette.rgb[num_iters][0]],
-        palette.g[palette.rgb[num_iters][1]],
-        palette.b[palette.rgb[num_iters][2]]
-    );
+    // maybe memcpy would be a good idea?
+    for(int i = 0; i < latime_poza * inaltime_poza; i++) {
+        fprintf(pgimg, "%d %d %d\n",
+            buffer[i][0],
+            buffer[i][1],
+            buffer[i][2]
+        );
+    }
     
+    free_buffer(buffer, latime_poza * inaltime_poza);
+    fclose(pgimg);
 }
