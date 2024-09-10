@@ -71,16 +71,16 @@ typedef struct {
 
 typedef struct {
     color_palette* palette;
-    int** buffer;
+    int* buffer;
     image_info* image_info;
     image_slice image_slice;
 } worker_task_info;
 
 void* deseneaza_mandelbrot(void* worker_task);
 
-int** buffer_init(int rows, int columns);
+int* buffer_init(int rows, int columns);
 
-void free_buffer(int** buffer, int rows);
+void free_buffer(int* buffer);
 
 void mandelbrot_around_center(
     const char* nume_poza, const int inaltime_poza, const int latime_poza,

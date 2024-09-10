@@ -123,15 +123,15 @@ void* deseneaza_mandelbrot(void* worker_task) {
         for(int j = task->image_slice.start_width; j < task->image_slice.end_width; j++) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
-
             roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
-            int index = (i * *task->image_info->width) + j;
+
+            int index = (i * *task->image_info->width + j) * 3;
             int iter_count = diverge(real_rotit, im_rotit, *task->image_info->num_iters, task->image_info->mandelbrot_func);
 
-            task->buffer[index][0] = task->palette->r[task->palette->rgb[iter_count][0]];
-            task->buffer[index][1] = task->palette->g[task->palette->rgb[iter_count][1]];
-            task->buffer[index][2] = task->palette->b[task->palette->rgb[iter_count][2]];
-
+            task->buffer[index]     = task->palette->r[task->palette->rgb[iter_count][0]];
+            task->buffer[index + 1] = task->palette->g[task->palette->rgb[iter_count][1]];
+            task->buffer[index + 2] = task->palette->b[task->palette->rgb[iter_count][2]];
+            // printf("%d %d %d\n", task->buffer[index], task->buffer[index + 1], task->buffer[index + 2]);
             parte_reala += *task->image_info->pixel_width;
 
             // progress_print(&progress);
@@ -140,20 +140,16 @@ void* deseneaza_mandelbrot(void* worker_task) {
     }
     return NULL;
 }
+//     |     |     |    |     |        |
+// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+// 
 
-int** buffer_init(int rows, int columns) {
-    int** buffer = (int**) malloc(rows * sizeof(int*));
-    for(int i = 0; i < rows; i++) {
-        buffer[i] = (int*) malloc(columns * sizeof(int)); 
-    }
+int* buffer_init(int rows, int columns) {
+    int* buffer = (int*) malloc(rows * columns * sizeof(int));
     return buffer;
 }
 
-void free_buffer(int** buffer, int rows) {
-    for(int i = 0; i < rows; i++) {
-        free(buffer[i]);
-        buffer[i] = NULL;
-    }
+void free_buffer(int* buffer) {
     free(buffer);
     buffer = NULL;
 }
@@ -190,24 +186,24 @@ void mandelbrot_around_center(
     };
 
     // replace the magic number with a var
-    int** buffer = buffer_init(latime_poza * inaltime_poza, 3);
+    int* buffer = buffer_init(latime_poza * inaltime_poza, 3);
 
-    const uint64_t thread_count = 4;
+    const uint64_t thread_count = 6;
     start_worker_threads(&thread_count, &palette, &image_info, buffer);
 
     wait_all_threads();
 
     // print the image
     // maybe memcpy would be a good idea?
-    for(int i = 0; i < latime_poza * inaltime_poza; i++) {
+    for(int i = 0; i < latime_poza * inaltime_poza * 3; i += 3) {
         fprintf(pgimg, "%d %d %d\n",
-            buffer[i][0],
-            buffer[i][1],
-            buffer[i][2]
+            buffer[i],
+            buffer[i + 1],
+            buffer[i + 2]
         );
     }
 
-    free_buffer(buffer, latime_poza * inaltime_poza);
+    free_buffer(buffer);
 
     fclose(pgimg);
 }

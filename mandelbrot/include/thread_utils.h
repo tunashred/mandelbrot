@@ -13,7 +13,7 @@ extern "C" {
 
 void next_slice(image_slice* slice, const int* slice_height, const int* image_height, const double* pixel_width);
 
-void start_worker_threads(const uint64_t* thread_count, color_palette* palette, image_info* image_info, int** buffer);
+void start_worker_threads(const uint64_t* thread_count, color_palette* palette, image_info* image_info, int* buffer);
 
 void wait_all_threads();
 
