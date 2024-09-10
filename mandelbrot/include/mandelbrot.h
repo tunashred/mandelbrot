@@ -51,14 +51,14 @@ void progress_print(progress_state* progress);
 FILE* initialize_image(const char* image_name, const int height, const int width);
 
 typedef struct {
-    void (*mandelbrot_func)(double, double, double, double, double*, double*);
-    const int* height;
-    const int* width;
-    const double* top_left_coord_real;
-    const double* top_left_coord_im;
     const double* pixel_width;
+    const double* top_left_coord_real;
     const double* rotate_degrees;
     const int* num_iters;
+    const int* width;
+    void (*mandelbrot_func)(double, double, double, double, double*, double*);
+    const int* height;
+    const double* top_left_coord_im;
 } image_info;
 
 typedef struct {
@@ -71,9 +71,9 @@ typedef struct {
 
 typedef struct {
     color_palette* palette;
+    int** buffer;
     image_info* image_info;
     image_slice image_slice;
-    int** buffer;
 } worker_task_info;
 
 void* deseneaza_mandelbrot(void* worker_task);
