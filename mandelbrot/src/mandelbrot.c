@@ -128,21 +128,27 @@ void* deseneaza_mandelbrot(void* worker_task) {
             int index = (i * *task->image_info->width + j) * 3;
             int iter_count = diverge(real_rotit, im_rotit, *task->image_info->num_iters, task->image_info->mandelbrot_func);
 
-            task->buffer[index]     = task->palette->r[task->palette->rgb[iter_count][0]];
-            task->buffer[index + 1] = task->palette->g[task->palette->rgb[iter_count][1]];
-            task->buffer[index + 2] = task->palette->b[task->palette->rgb[iter_count][2]];
-            // printf("%d %d %d\n", task->buffer[index], task->buffer[index + 1], task->buffer[index + 2]);
+            task->buffer[index] = iter_count;
+            
             parte_reala += *task->image_info->pixel_width;
 
             // progress_print(&progress);
-        }
+    }
         parte_imaginara -= *task->image_info->pixel_width;
     }
+
+    for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
+        for(int j = task->image_slice.start_width; j < task->image_slice.end_width; j++) {
+            int index = (i * *task->image_info->width + j) * 3;
+            int iter_count = task->buffer[index];
+            task->buffer[index]     = task->palette->r[task->palette->rgb[iter_count][0]];
+            task->buffer[index + 1] = task->palette->g[task->palette->rgb[iter_count][1]];
+            task->buffer[index + 2] = task->palette->b[task->palette->rgb[iter_count][2]];
+        }
+    }
+
     return NULL;
 }
-//     |     |     |    |     |        |
-// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-// 
 
 int* buffer_init(int rows, int columns) {
     int* buffer = (int*) malloc(rows * columns * sizeof(int));
@@ -188,7 +194,7 @@ void mandelbrot_around_center(
     // replace the magic number with a var
     int* buffer = buffer_init(latime_poza * inaltime_poza, 3);
 
-    const uint64_t thread_count = 6;
+    const uint64_t thread_count = 4;
     start_worker_threads(&thread_count, &palette, &image_info, buffer);
 
     wait_all_threads();
