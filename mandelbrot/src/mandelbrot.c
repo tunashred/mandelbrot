@@ -165,7 +165,7 @@ void mandelbrot_around_center(
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
-    void (*mandelbrot_func)(double, double, double, double, double*, double*)
+    void (*mandelbrot_func)(double, double, double, double, double*, double*), const u_int64_t thread_count
 ) {
     const int latura_scurta              = (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     const double pixel_width             = radius * 2 / latura_scurta;
@@ -194,7 +194,6 @@ void mandelbrot_around_center(
     // replace the magic number with a var
     int* buffer = buffer_init(latime_poza * inaltime_poza, 3);
 
-    const uint64_t thread_count = 4;
     start_worker_threads(&thread_count, &palette, &image_info, buffer);
 
     wait_all_threads();

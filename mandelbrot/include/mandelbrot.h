@@ -1,6 +1,7 @@
 #ifndef MANDELBROT_H
 #define MANDELBROT_H
 
+#include <sys/types.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -87,7 +88,7 @@ void mandelbrot_around_center(
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
-    void (*mandelbrot_func)(double, double, double, double, double*, double*)
+    void (*mandelbrot_func)(double, double, double, double, double*, double*), const u_int64_t thread_count
 );
 
 
