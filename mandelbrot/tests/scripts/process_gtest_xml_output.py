@@ -14,6 +14,7 @@ BLUE = '\033[94m'
 YELLOW = '\033[93m'
 RESET = '\033[0m'
 
+
 def load_baseline(file_path):
     """Load the baseline data from the specified CSV file."""
     baseline_data = {}
@@ -21,8 +22,9 @@ def load_baseline(file_path):
         reader = csv.DictReader(csvfile)
         for row in reader:
             test_name = row["Test Name"]
-            expected_time = float(row["Expected Execution Time"])  # Correct column name
-            baseline_data[test_name] = expected_time
+            scale = float(row["Scale"])
+            expected_time = float(row["Expected Execution Time"])
+            baseline_data[(test_name, scale)] = expected_time
     return baseline_data
 
 
@@ -36,10 +38,15 @@ def parse_gtest_xml(xml_path):
         suite_name = testsuite.get("name")
         test_suites[suite_name] = []
         for testcase in testsuite.findall("testcase"):
-            test_name = testcase.get("name")
+            test_name_with_prefix = testcase.get("name")
             time = float(testcase.get("time", 0))
-            results[test_name] = (time, suite_name)
-            test_suites[suite_name].append(test_name)
+            scale = float(testcase.find(".//property[@name='scale']").get("value", 0))
+
+            # Strip prefix from test name (e.g., Mandelbrot/0 becomes Mandelbrot)
+            stripped_test_name = test_name_with_prefix.split('/')[0]
+
+            results[(stripped_test_name, scale)] = (time, suite_name)
+            test_suites[suite_name].append((stripped_test_name, scale))
 
     return results, test_suites
 
@@ -49,27 +56,28 @@ def compare_results(baseline_data, results, baseline_filename, threshold_percent
     comparison_results = []
     test_suites_reported = set()
 
-    for test_name, (new_time, suite_name) in results.items():
+    for (test_name, scale), (new_time, suite_name) in results.items():
         if suite_name not in test_suites_reported:
             if test_suites_reported:
                 comparison_results.append(f"\n{RESET}")
             test_suites_reported.add(suite_name)
             comparison_results.append(f"\n{BLUE}\033[1mTest Suite: {suite_name}\033[0m")
 
-        expected_time = baseline_data.get(test_name)
+        expected_time = baseline_data.get((test_name, scale))
         if expected_time is not None:
             threshold = expected_time * (threshold_percentage / 100)
             if new_time < expected_time:
                 comparison_results.append(
-                    f"Comparing {test_name} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {GREEN}(NICE){RESET}")
+                    f"Comparing {test_name} with scale {scale} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {GREEN}(NICE){RESET}")
             elif new_time <= expected_time + threshold:
                 comparison_results.append(
-                    f"Comparing {test_name} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {YELLOW}(OK){RESET}")
+                    f"Comparing {test_name} with scale {scale} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {YELLOW}(OK){RESET}")
             else:
                 comparison_results.append(
-                    f"Comparing {test_name} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {RED}(REGRESSION){RESET}")
+                    f"Comparing {test_name} with scale {scale} against {baseline_filename}: Expected Time = {expected_time}, New Time = {new_time} {RED}(REGRESSION){RESET}")
         else:
-            comparison_results.append(f"Test {test_name} not found in {baseline_filename} {RED}(REGRESSION){RESET}")
+            comparison_results.append(
+                f"Test {test_name} with scale {scale} not found in {baseline_filename} {RED}(REGRESSION){RESET}")
 
     return comparison_results
 
@@ -81,7 +89,7 @@ def write_results_to_csv(results_file, results, baseline_data, threshold_percent
     write_header = not append or not Path(results_file).exists() or Path(results_file).stat().st_size == 0
 
     with open(results_file, mode=file_mode, newline='') as csvfile:
-        fieldnames = ['Test Suite', 'Test Name', 'Execution Time', 'Timestamp', 'Result', 'Regression']
+        fieldnames = ['Test Suite', 'Test Name', 'Scale', 'Execution Time', 'Timestamp', 'Result', 'Regression']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         if write_header:
@@ -91,10 +99,10 @@ def write_results_to_csv(results_file, results, baseline_data, threshold_percent
         if append:
             csvfile.write('\n')
 
-        for test_name, (exec_time, suite_name) in results.items():
+        for (test_name, scale), (exec_time, suite_name) in results.items():
             result = 'completed'
             regression = ''
-            expected_time = baseline_data.get(test_name)
+            expected_time = baseline_data.get((test_name, scale))
 
             if expected_time is not None:
                 threshold = expected_time * (threshold_percentage / 100)
@@ -110,6 +118,7 @@ def write_results_to_csv(results_file, results, baseline_data, threshold_percent
             writer.writerow({
                 'Test Suite': suite_name,
                 'Test Name': test_name,
+                'Scale': scale,
                 'Execution Time': exec_time,
                 'Timestamp': timestamp,
                 'Result': result,
@@ -122,7 +131,8 @@ def main():
     parser.add_argument('baseline_file', type=str, help='Path to the baseline CSV file')
     parser.add_argument('results_file', type=str, help='Path to the gtest XML output file')
     parser.add_argument('output_csv', type=str, help='Path to the output results CSV file')
-    parser.add_argument('--threshold', type=float, default=10.0, help='Percentage threshold for acceptable time difference')
+    parser.add_argument('--threshold', type=float, default=10.0,
+                        help='Percentage threshold for acceptable time difference')
 
     args = parser.parse_args()
 
@@ -157,10 +167,11 @@ def main():
         # Write the results to the CSV with threshold consideration
         write_results_to_csv(output_csv, results, baseline_data, threshold_percentage, append=True)
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print(f"{RED}Usage: {sys.argv[0]} <baseline_file> <results_file> <output_csv> <optional: threshold percent>{RESET}")
+        print(
+            f"{RED}Usage: {sys.argv[0]} <baseline_file> <results_file> <output_csv> <optional: threshold percent>{RESET}")
         sys.exit(1)
 
     main()
-
