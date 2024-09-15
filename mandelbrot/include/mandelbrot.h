@@ -10,6 +10,7 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "color_mapping.h"
 

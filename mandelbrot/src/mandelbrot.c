@@ -133,7 +133,7 @@ void* deseneaza_mandelbrot(void* worker_task) {
             parte_reala += *task->image_info->pixel_width;
 
             // progress_print(&progress);
-    }
+        }
         parte_imaginara -= *task->image_info->pixel_width;
     }
 
@@ -152,6 +152,8 @@ void* deseneaza_mandelbrot(void* worker_task) {
 
 int* buffer_init(int rows, int columns) {
     int* buffer = (int*) malloc(rows * columns * sizeof(int));
+    // "touching" the buffer to make sure the memory was *really* allocated
+    memset(buffer, 0, rows * columns * sizeof(int));
     return buffer;
 }
 
@@ -198,8 +200,6 @@ void mandelbrot_around_center(
 
     wait_all_threads();
 
-    // print the image
-    // maybe memcpy would be a good idea?
     for(int i = 0; i < latime_poza * inaltime_poza * 3; i += 3) {
         fprintf(pgimg, "%d %d %d\n",
             buffer[i],
