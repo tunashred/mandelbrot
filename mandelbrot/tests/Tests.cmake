@@ -1,4 +1,3 @@
-# Tests.cmake
 cmake_minimum_required(VERSION 3.1.0)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -121,10 +120,16 @@ add_executable(test_mandelbrot ${TEST_SOURCES} ${C_SOURCES})
 
 # Add compile flags
 target_compile_options(test_mandelbrot PRIVATE ${COMPILE_FLAGS})
+target_compile_options(test_mandelbrot PRIVATE 
+    "$<$<CONFIG:Release>:${RELEASE_FLAGS}>"
+    "$<$<CONFIG:Debug>:${DEBUG_FLAGS}>"
+)
 
 # Link libs for tests
 target_link_libraries(test_mandelbrot ${GTEST_LIB} ${GTEST_MAIN_LIB} pthread)
-target_link_options(test_mandelbrot PRIVATE -lm)
+target_link_options(test_mandelbrot PRIVATE 
+    "$<$<CONFIG:Release>:${RELEASE_FLAGS}>"
+)
 
 gtest_discover_tests(test_mandelbrot DISCOVERY_TIMEOUT 10)
 
