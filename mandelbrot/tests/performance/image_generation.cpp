@@ -117,3 +117,4 @@ INSTANTIATE_TEST_SUITE_P(
     ImageGenerationExtra,
     ::testing::Values(1.5, 2.5, 3, 3.5)
 );
+
