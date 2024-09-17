@@ -87,7 +87,6 @@ TEST_F(MultithreadStressCompute, MaxDiverge) {
 TEST_F(MultithreadStressCompute, IndividualBuffersMaxDiverge) {
     for(int i = 0; i < thread_count; ++i) {
         thread_data[i].buffer_size = stress_iterations * RGB_VALUES;
-        std::cout << thread_data[i].buffer_size << " <-- buffer size of " << i << " thread\n";
         thread_data[i].buffer = (int*) malloc(stress_iterations * sizeof(int));
     }
 
@@ -101,7 +100,6 @@ TEST_F(MultithreadStressCompute, IndividualBuffersMaxDiverge) {
 
 TEST_F(MultithreadStressCompute, SharedBufferMaxDiverge) {
     int buffer_size = stress_iterations * thread_count * RGB_VALUES;
-    std::cout << "shared buffer size: " << buffer_size << '\n';
     int* shared_buffer = (int*) malloc(buffer_size * sizeof(int));
 
     for(int i = 0; i < thread_count; ++i) {
