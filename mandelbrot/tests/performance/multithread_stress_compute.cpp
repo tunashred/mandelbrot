@@ -16,7 +16,6 @@ int stress_iterations = 2000000;
 struct ThreadData {
     int* buffer;
     int buffer_size;
-    int iterations_taken;
     int start_index;
     int end_index;
 };
@@ -24,7 +23,7 @@ struct ThreadData {
 void* stress_diverge(void* arg) {
     ThreadData* data = (ThreadData*) arg;
     for (int i = 0; i < stress_iterations; ++i) {
-        data->iterations_taken = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
+        diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
     }
     return NULL;
 }
@@ -33,7 +32,6 @@ void* buffer_stress(void* arg) {
     ThreadData* data = (ThreadData*) arg;
     int* buffer = data->buffer;
     int buffer_size = data->buffer_size;
-    int iterations_taken = 0;
 
     for (int i = 0; i < stress_iterations; ++i) {
         buffer[i] = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
@@ -46,11 +44,9 @@ void* shared_buffer_stress(void* arg) {
     int* buffer = data->buffer;
     int start_index = data->start_index;
     int end_index = data->end_index;
-    int iterations_taken = 0;
 
     for (int i = start_index; i < end_index; ++i) {
-        iterations_taken = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
-        buffer[i] = iterations_taken;
+        buffer[i] = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
     }
     return NULL;
 }
