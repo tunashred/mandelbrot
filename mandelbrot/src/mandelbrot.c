@@ -120,16 +120,16 @@ void* deseneaza_mandelbrot(void* worker_task) {
     double parte_imaginara = task->image_slice.slice_top_left_coor_im;
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
         double parte_reala = *task->image_info->top_left_coord_real;
-        for(int j = task->image_slice.start_width; j < task->image_slice.end_width; j++) {
+        int width_offset = (i * *task->image_info->width) * 3;
+        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * 3; j += 3) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
             roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
 
-            int index = (i * *task->image_info->width + j) * 3;
             int iter_count = diverge(real_rotit, im_rotit, *task->image_info->num_iters, task->image_info->mandelbrot_func);
 
+            int index = width_offset + j;
             task->buffer[index] = iter_count;
-            
             parte_reala += *task->image_info->pixel_width;
 
             // progress_print(&progress);
@@ -138,9 +138,11 @@ void* deseneaza_mandelbrot(void* worker_task) {
     }
 
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
-        for(int j = task->image_slice.start_width; j < task->image_slice.end_width; j++) {
-            int index = (i * *task->image_info->width + j) * 3;
+        int width_offset = (i * *task->image_info->width) * 3;
+        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * 3; j += 3) {
+            int index = width_offset + j;
             int iter_count = task->buffer[index];
+            
             task->buffer[index]     = task->palette->r[task->palette->rgb[iter_count][0]];
             task->buffer[index + 1] = task->palette->g[task->palette->rgb[iter_count][1]];
             task->buffer[index + 2] = task->palette->b[task->palette->rgb[iter_count][2]];
