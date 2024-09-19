@@ -138,7 +138,7 @@ void* deseneaza_mandelbrot(void* worker_task) {
     }
 
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
-        int width_offset = (i * *task->image_info->width) * 3RGB_CHANNELS;
+        int width_offset = (i * *task->image_info->width) * RGB_CHANNELS;
         for(int j = task->image_slice.start_width; j < task->image_slice.end_width * RGB_CHANNELS; j += RGB_CHANNELS) {
             int index = width_offset + j;
             int iter_count = task->buffer[index];
