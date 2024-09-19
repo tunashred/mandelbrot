@@ -112,7 +112,7 @@ void generate_color_palette(
         }
         
         for(int i = 0; i < NUM_COLORS; i++) {
-            if(fscanf(file, "%d %d %d", &palette->r[i], &palette->g[i], &palette->b[i]) != 3) {
+            if(fscanf(file, "%d %d %d", &palette->r[i], &palette->g[i], &palette->b[i]) != RGB_CHANNELS) {
                 fprintf(stderr, "Incomplete palette file\n");
                 exit(EXIT_FAILURE);
             }

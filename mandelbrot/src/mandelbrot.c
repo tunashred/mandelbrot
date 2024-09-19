@@ -120,8 +120,8 @@ void* deseneaza_mandelbrot(void* worker_task) {
     double parte_imaginara = task->image_slice.slice_top_left_coor_im;
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
         double parte_reala = *task->image_info->top_left_coord_real;
-        int width_offset = (i * *task->image_info->width) * 3;
-        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * 3; j += 3) {
+        int width_offset = (i * *task->image_info->width) * RGB_CHANNELS;
+        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * RGB_CHANNELS; j += RGB_CHANNELS) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
             roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
@@ -138,8 +138,8 @@ void* deseneaza_mandelbrot(void* worker_task) {
     }
 
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
-        int width_offset = (i * *task->image_info->width) * 3;
-        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * 3; j += 3) {
+        int width_offset = (i * *task->image_info->width) * 3RGB_CHANNELS;
+        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * RGB_CHANNELS; j += RGB_CHANNELS) {
             int index = width_offset + j;
             int iter_count = task->buffer[index];
             
@@ -196,13 +196,13 @@ void mandelbrot_around_center(
     };
 
     // replace the magic number with a var
-    int* buffer = buffer_init(latime_poza * inaltime_poza, 3);
+    int* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
 
     start_worker_threads(&thread_count, &palette, &image_info, buffer);
 
     wait_all_threads();
 
-    for(int i = 0; i < latime_poza * inaltime_poza * 3; i += 3) {
+    for(int i = 0; i < latime_poza * inaltime_poza * RGB_CHANNELS; i += RGB_CHANNELS) {
         fprintf(pgimg, "%d %d %d\n",
             buffer[i],
             buffer[i + 1],

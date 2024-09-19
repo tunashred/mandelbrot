@@ -9,13 +9,14 @@ extern "C" {
 #include <math.h>
 #include <stdlib.h>
 
+#define RGB_CHANNELS 3
 #define NUM_COLORS 1500
 
 typedef struct {
     int r[NUM_COLORS];
     int g[NUM_COLORS];
     int b[NUM_COLORS];
-    int rgb[NUM_COLORS][3];
+    int rgb[NUM_COLORS][RGB_CHANNELS];
 } color_palette;
 
 double linear_map(double from, double from_min, double from_max, double to_min, double to_max);
