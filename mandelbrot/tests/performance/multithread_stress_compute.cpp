@@ -1,10 +1,9 @@
+#include "color_mapping.h"
 #include "gtest/gtest.h"
 #include <pthread.h>
 #include <cstdlib>
 #include <cstring>
 #include <mandelbrot.h>
-
-#define RGB_VALUES 3
 
 int thread_count = 6;
 // these coordinates diverge at 1451 iterations
@@ -14,9 +13,9 @@ int max_iterations = 1500;
 
 struct ThreadData {
     int* buffer;
-    int buffer_size;
-    int start_index;
-    int end_index;
+    long buffer_size;
+    long start_index;
+    long end_index;
     int stress_iterations;
 };
 
@@ -31,9 +30,9 @@ void* stress_diverge(void* arg) {
 void* buffer_stress(void* arg) {
     ThreadData* data = (ThreadData*) arg;
     int* buffer = data->buffer;
-    int buffer_size = data->buffer_size;
+    long buffer_size = data->buffer_size;
 
-    for (int i = 0; i < data->stress_iterations / thread_count; ++i) {
+    for (long i = 0; i < data->buffer_size; ++i) {
         buffer[i] = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
     }
     return NULL;
@@ -42,10 +41,10 @@ void* buffer_stress(void* arg) {
 void* shared_buffer_stress(void* arg) {
     ThreadData* data = (ThreadData*) arg;
     int* buffer = data->buffer;
-    int start_index = data->start_index;
-    int end_index = data->end_index;
+    long start_index = data->start_index;
+    long end_index = data->end_index;
 
-    for (int i = start_index; i < end_index; ++i) {
+    for (long i = start_index; i < end_index; ++i) {
         buffer[i] = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
     }
     return NULL;
@@ -61,6 +60,9 @@ protected:
         stress_iterations = GetParam();
         threads = new pthread_t[thread_count];
         thread_data = new ThreadData[thread_count];
+        for (int i = 0; i < thread_count; ++i) {
+            thread_data[i].stress_iterations = stress_iterations;
+        }
     }
 
     void TearDown() override {
@@ -88,8 +90,8 @@ TEST_P(MultithreadStressCompute, MaxDiverge) {
 
 TEST_P(MultithreadStressCompute, IndividualBuffersMaxDiverge) {
     for(int i = 0; i < thread_count; ++i) {
-        thread_data[i].buffer_size = stress_iterations * RGB_VALUES;
-        thread_data[i].buffer = (int*) malloc(stress_iterations * sizeof(int));
+        thread_data[i].buffer_size = (stress_iterations / thread_count) * RGB_CHANNELS;
+        thread_data[i].buffer = (int*) malloc(thread_data[i].buffer_size * sizeof(int));
     }
 
     run_threads(buffer_stress);
@@ -101,19 +103,17 @@ TEST_P(MultithreadStressCompute, IndividualBuffersMaxDiverge) {
 }
 
 TEST_P(MultithreadStressCompute, SharedBufferMaxDiverge) {
-    int buffer_size = stress_iterations * thread_count * RGB_VALUES;
-    int* shared_buffer = (int*) malloc(buffer_size * sizeof(int));
+    long total_buffer_size = stress_iterations * RGB_CHANNELS;
+    int* shared_buffer = (int*) malloc(total_buffer_size * sizeof(int));
 
-    for(int i = 0; i < thread_count; ++i) {
+    long slice_size = total_buffer_size / thread_count;
+
+    for (int i = 0; i < thread_count; ++i) {
         thread_data[i].buffer = shared_buffer;
-        thread_data[i].buffer_size = buffer_size;
-        thread_data[i].start_index = i * (buffer_size / thread_count);
-        int end_index = (i + 1) * (buffer_size / thread_count);
-        if(end_index > buffer_size) {
-            thread_data[i].end_index = buffer_size;
-        } else {
-            thread_data[i].end_index = end_index;
-        }
+        thread_data[i].buffer_size = total_buffer_size;
+
+        thread_data[i].start_index = i * slice_size;
+        thread_data[i].end_index = (i == thread_count - 1) ? total_buffer_size : (i + 1) * slice_size;
     }
 
     run_threads(shared_buffer_stress);
@@ -121,6 +121,7 @@ TEST_P(MultithreadStressCompute, SharedBufferMaxDiverge) {
 
     free(shared_buffer);
 }
+
 
 INSTANTIATE_TEST_SUITE_P(
     mandatory_compute,
