@@ -17,7 +17,7 @@ struct ThreadData {
     int buffer_size;
     int start_index;
     int end_index;
-    int stress_iterations
+    int stress_iterations;
 };
 
 void* stress_diverge(void* arg) {
