@@ -19,7 +19,7 @@ typedef struct {
     worker_task_info* workers_info;
 } job_info;
 
-job_info* start_worker_threads(const uint64_t* thread_count, color_palette* palette, image_info* image_info, int* buffer);
+job_info* start_worker_threads(const uint64_t* thread_count, color_palette* palette, image_info* img_info, int* buffer);
 
 void wait_all_threads(job_info* job);
 

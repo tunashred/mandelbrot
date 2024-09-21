@@ -92,7 +92,6 @@ void mandelbrot_around_center(
     void (*mandelbrot_func)(double, double, double, double, double*, double*), const u_int64_t thread_count
 );
 
-
 #ifdef __cplusplus
 }
 #endif

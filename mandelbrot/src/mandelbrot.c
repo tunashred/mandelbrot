@@ -122,8 +122,8 @@ void* deseneaza_mandelbrot(void* worker_task) {
     double parte_imaginara = task->image_slice.slice_top_left_coor_im;
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
         double parte_reala = *task->image_info->top_left_coord_real;
-        int width_offset = (i * *task->image_info->width) * RGB_CHANNELS;
-        int end_width = task->image_slice.end_width * RGB_CHANNELS;
+        int width_offset = (i * *task->image_info->width) * RGB_CHANNELS,
+        end_width        = task->image_slice.end_width * RGB_CHANNELS;
         for(int j = task->image_slice.start_width; j < end_width; j += RGB_CHANNELS) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
@@ -149,9 +149,10 @@ void* deseneaza_mandelbrot(void* worker_task) {
 }
 
 int* buffer_init(int rows, int columns) {
-    int* buffer = (int*) malloc(rows * columns * sizeof(int));
+    size_t total_size = (size_t)rows * (size_t)columns;
+    int* buffer = (int*) malloc(total_size * sizeof(int));
     // "touching" the buffer to make sure the memory was *really* allocated
-    memset(buffer, 0, rows * columns * sizeof(int));
+    memset(buffer, 0, (size_t)(total_size * sizeof(int)));
     return buffer;
 }
 
@@ -180,7 +181,7 @@ void mandelbrot_around_center(
         red_mapping_func, green_mapping_func, blue_mapping_func
     );
 
-    image_info image_info = {
+    image_info img_info = {
         .mandelbrot_func     = mandelbrot_func,
         .height              = &inaltime_poza,
         .width               = &latime_poza,
@@ -194,7 +195,7 @@ void mandelbrot_around_center(
     // replace the magic number with a var
     int* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
 
-    job_info* job = start_worker_threads(&thread_count, &palette, &image_info, buffer);
+    job_info* job = start_worker_threads(&thread_count, &palette, &img_info, buffer);
 
     wait_all_threads(job);
 
