@@ -117,36 +117,32 @@ void* deseneaza_mandelbrot(void* worker_task) {
         .symbols_count = 4
     };
 
+    color_palette palette = *task->palette;
+
     double parte_imaginara = task->image_slice.slice_top_left_coor_im;
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
         double parte_reala = *task->image_info->top_left_coord_real;
         int width_offset = (i * *task->image_info->width) * RGB_CHANNELS;
-        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * RGB_CHANNELS; j += RGB_CHANNELS) {
+        int end_width = task->image_slice.end_width * RGB_CHANNELS;
+        for(int j = task->image_slice.start_width; j < end_width; j += RGB_CHANNELS) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
             roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
 
             int iter_count = diverge(real_rotit, im_rotit, *task->image_info->num_iters, task->image_info->mandelbrot_func);
 
-            int index = width_offset + j;
-            task->buffer[index] = iter_count;
-            parte_reala += *task->image_info->pixel_width;
+            int r = palette.r[palette.rgb[iter_count][0]];
+            int g = palette.g[palette.rgb[iter_count][1]];
+            int b = palette.b[palette.rgb[iter_count][2]];
 
-            // progress_print(&progress);
+            int index = width_offset + j;
+            task->buffer[index]     = r;
+            task->buffer[index + 1] = g;
+            task->buffer[index + 2] = b;
+
+            parte_reala += *task->image_info->pixel_width;
         }
         parte_imaginara -= *task->image_info->pixel_width;
-    }
-
-    for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
-        int width_offset = (i * *task->image_info->width) * RGB_CHANNELS;
-        for(int j = task->image_slice.start_width; j < task->image_slice.end_width * RGB_CHANNELS; j += RGB_CHANNELS) {
-            int index = width_offset + j;
-            int iter_count = task->buffer[index];
-            
-            task->buffer[index]     = task->palette->r[task->palette->rgb[iter_count][0]];
-            task->buffer[index + 1] = task->palette->g[task->palette->rgb[iter_count][1]];
-            task->buffer[index + 2] = task->palette->b[task->palette->rgb[iter_count][2]];
-        }
     }
 
     return NULL;
