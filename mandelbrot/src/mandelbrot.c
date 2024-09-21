@@ -192,7 +192,6 @@ void mandelbrot_around_center(
         .num_iters           = &num_iters
     };
 
-    // replace the magic number with a var
     int* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
 
     job_info* job = start_worker_threads(&thread_count, &palette, &img_info, buffer);
