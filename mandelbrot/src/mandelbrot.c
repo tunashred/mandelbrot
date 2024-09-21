@@ -194,9 +194,9 @@ void mandelbrot_around_center(
     // replace the magic number with a var
     int* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
 
-    start_worker_threads(&thread_count, &palette, &image_info, buffer);
+    job_info* job = start_worker_threads(&thread_count, &palette, &image_info, buffer);
 
-    wait_all_threads();
+    wait_all_threads(job);
 
     for(int i = 0; i < latime_poza * inaltime_poza * RGB_CHANNELS; i += RGB_CHANNELS) {
         fprintf(pgimg, "%d %d %d\n",

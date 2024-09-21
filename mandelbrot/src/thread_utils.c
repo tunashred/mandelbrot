@@ -3,14 +3,10 @@
 #include "thread_utils.h"
 #include "mandelbrot.h"
 
-static uint64_t g_thread_count = 0; //TODO: revert this back to an int and just explicitly convert when needed
-static pthread_t* threads = NULL;
-static worker_task_info* workers_info = NULL;
 
-void start_worker_threads(const uint64_t* thread_count, color_palette* palette, image_info* image_info, int* buffer) {
-    threads = (pthread_t*) malloc(*thread_count * sizeof(pthread_t));
-    g_thread_count = *thread_count;
-    workers_info = (worker_task_info*) malloc(*thread_count * sizeof(worker_task_info)); //TODO: investigate sizeof(workers_info) case
+job_info* start_worker_threads(const uint64_t* thread_count, color_palette* palette, image_info* image_info, int* buffer) {
+    pthread_t* threads = (pthread_t*) malloc(*thread_count * sizeof(pthread_t));
+    worker_task_info* workers_info = (worker_task_info*) malloc(*thread_count * sizeof(worker_task_info)); //TODO: investigate sizeof(workers_info) case
 
     const int slice_height = *(image_info->height) / *thread_count;
 
@@ -30,16 +26,22 @@ void start_worker_threads(const uint64_t* thread_count, color_palette* palette, 
 
         pthread_create(&threads[i], NULL, deseneaza_mandelbrot, &workers_info[i]);
     }
+    job_info* job = (job_info*) malloc(sizeof *job);
+    job->threads = threads;
+    job->thread_count = *thread_count;
+    job->workers_info = workers_info;
+
+    return job;
 }
 
-void wait_all_threads() {
-    for(uint64_t i = 0; i < g_thread_count; i++) {
-        pthread_join(threads[i], NULL);
+void wait_all_threads(job_info* job) {
+    for(uint64_t i = 0; i < job->thread_count; i++) {
+        pthread_join(job->threads[i], NULL);
     }
-    g_thread_count = 0;
-    free(threads);
-    threads = NULL;
+    job->thread_count = 0;
+    free(job->threads);
+    job->threads = NULL;
 
-    free(workers_info);
-    workers_info = NULL;
+    free(job->workers_info);
+    job->workers_info = NULL;
 }
