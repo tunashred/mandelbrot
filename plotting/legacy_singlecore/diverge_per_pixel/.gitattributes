@@ -1,0 +1,9 @@
+diverge_data_seastar_0_5.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_galaxy_2.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_galaxy_4.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_mandelbrot_0_5.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_mandelbrot_1.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_mandelbrot_2.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_seastar_2.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_shells_2.csv filter=lfs diff=lfs merge=lfs -text
+diverge_data_stuff_2.csv filter=lfs diff=lfs merge=lfs -text
