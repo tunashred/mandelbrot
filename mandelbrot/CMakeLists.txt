@@ -70,6 +70,7 @@ set(DEBUG_FLAGS
     -fverbose-asm
     -finstrument-functions
     -fanalyzer
+    -fno-inline
 )
 
 function(generate_assembly_for_file SRC_FILE)
@@ -126,3 +127,4 @@ endif()
 # -fverbose-asm: Puts extra comments to generated assembly code to make it more readable
 # -finstrument-functions: Inserts hooks for each function in the program
 # -fanalyzer: Static analyser at compile time
+# -fno-inline: Prevents compiler from inlining any function
