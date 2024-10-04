@@ -1,0 +1,3 @@
+[submodule "color-palette-creator"]
+	path = color-palette-creator
+	url = https://github.com/tunashred/color-palette-creator
