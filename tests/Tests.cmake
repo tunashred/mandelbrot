@@ -14,7 +14,7 @@ set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/scripts)
 # Function to add custom flags to a build
 # It builds the project, runs it and then deletes the executable
 function(add_custom_flags_test test_name flags)
-    set(temp_target "${EXECUTABLE}_${test_name}")
+    set(temp_target "${TARGET}_${test_name}")
 
     add_executable(${temp_target} ${C_SOURCES} ${MAIN_FILE_PATH})
 
@@ -50,17 +50,17 @@ set_tests_properties(sanitizer_thread PROPERTIES LABELS "sanitizers;sanitizer_th
 #
 # CPU profiling test
 #
-add_executable(${EXECUTABLE}_profiler ${C_SOURCES} ${MAIN_FILE_PATH})
-target_link_options(${EXECUTABLE}_profiler PRIVATE -lm -lprofiler)
+add_executable(${TARGET}_profiler ${C_SOURCES} ${MAIN_FILE_PATH})
+target_link_options(${TARGET}_profiler PRIVATE -lm -lprofiler)
 
 add_custom_target(cpu_profiler_gperftools_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/cpu_profiler_gperftools.sh
-    "${CMAKE_BINARY_DIR}/${EXECUTABLE}_profiler"
+    "${CMAKE_BINARY_DIR}/${TARGET}_profiler"
     "${CMAKE_BINARY_DIR}/mandelbrot.prof"
     "${LOGS_DIR}/cpu_profile_analysis.txt"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running CPU profiler test..."
-    DEPENDS ${EXECUTABLE}_profiler
+    DEPENDS ${TARGET}_profiler
 )
 
 add_test(NAME cpu_profiler_gperftools
@@ -74,11 +74,11 @@ set_tests_properties(cpu_profiler_gperftools PROPERTIES LABELS "profiling;cpu_pr
 #
 add_custom_target(memcheck_valgrind_script
     COMMAND ${CMAKE_COMMAND} -E env bash ${SCRIPTS_DIR}/memcheck_valgrind.sh
-    "${CMAKE_BINARY_DIR}/${EXECUTABLE}"
+    "${CMAKE_BINARY_DIR}/${TARGET}"
     "${LOGS_DIR}"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running Valgrind Memcheck..."
-    DEPENDS ${EXECUTABLE}
+    DEPENDS ${TARGET}
 )
 # TODO: Add asserts to the output? Add 'WILL_FAIL' property?
 add_test(NAME memcheck_valgrind

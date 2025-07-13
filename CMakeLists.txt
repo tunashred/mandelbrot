@@ -22,18 +22,10 @@ set(MAIN_FILE_PATH "${CMAKE_SOURCE_DIR}/src/main.c")
 list(REMOVE_ITEM C_SOURCES "${MAIN_FILE_PATH}")
 
 # Set executable name
-set(EXECUTABLE "mandelbrot")
+set(TARGET "mandelbrot")
 
 # Add executable target
-add_executable(${EXECUTABLE} ${C_SOURCES} ${MAIN_FILE_PATH})
-
-# Set sanitizer types
-set(SANITIZER_ADDRESS "-fsanitize=address")
-set(SANITIZER_THREAD "-fsanitize=thread")
-set(SANITIZER_UNDEFINED "-fsanitize=undefined")
-
-# Include the tests
-include(${CMAKE_SOURCE_DIR}/tests/Tests.cmake)
+add_executable(${TARGET} ${C_SOURCES} ${MAIN_FILE_PATH})
 
 #
 # Compile flags for any build type
@@ -52,10 +44,10 @@ set(COMPILE_FLAGS
 )
 
 # Add compile flags
-target_compile_options(${EXECUTABLE} PRIVATE ${COMPILE_FLAGS})
+target_compile_options(${TARGET} PRIVATE ${COMPILE_FLAGS})
 
 # Link libs
-target_link_options(${EXECUTABLE} PRIVATE -lm)
+target_link_options(${TARGET} PRIVATE -lm)
 
 # Release specific flags
 set(RELEASE_FLAGS
@@ -88,6 +80,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 
 # Extra compile flags for debug build
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Set sanitizer types
+    set(SANITIZER_ADDRESS "-fsanitize=address")
+    set(SANITIZER_THREAD "-fsanitize=thread")
+    set(SANITIZER_UNDEFINED "-fsanitize=undefined")
+
+    # Include the tests
+    include(${CMAKE_SOURCE_DIR}/tests/Tests.cmake)
+
+    # Add debug flags
     add_compile_options(${DEBUG_FLAGS})
 
     # Generate assembly files
@@ -95,6 +96,19 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
         generate_assembly_for_file(${SRC_FILE})
     endforeach()
 endif()
+
+#
+# Exporting as DLL
+#
+set(DLL lib_${TARGET}_singlecore)
+add_library(${DLL} SHARED ${C_SOURCES})
+
+if(WIN32)
+    target_compile_definitions(${DLL} PRIVATE DLL_BUILD)
+endif()
+
+set_target_properties(${DLL} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 
 ##################################################################
 # Commentary on compile flags
