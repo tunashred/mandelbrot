@@ -95,3 +95,5 @@ _deps
 **/*.json
 **/tests/output
 **/.idea
+pictures
+plotting/diverge_per_pixel
