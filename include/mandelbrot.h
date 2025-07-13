@@ -8,6 +8,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 
 // calculeaza f꜀(z) = z² + c
 void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
@@ -47,14 +48,14 @@ void progress_print(progress_state* progress);
 
 FILE* initialize_image(const char* image_name, int height, int width);
 
-void deseneaza_mandelbrot(
+uint32_t* deseneaza_mandelbrot(
     const char* nume_poza, int inaltime_poza, int latime_poza,
     double top_left_coord_real, double top_left_coord_imaginar, double pixel_width,
     int num_iters, double rotate_degrees, double brightness,
     int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
 );
 
-void mandelbrot_around_center(
+uint32_t* mandelbrot_around_center(
     const char* nume_poza, int inaltime_poza, int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,

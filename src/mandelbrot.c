@@ -1,5 +1,6 @@
 #include "mandelbrot.h"
 #include "color_mapping.h"
+#include <stdint.h>
 
 void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
     *rez_real = pow(z_real, 2) - pow(z_im, 2) + c_real;
@@ -90,33 +91,39 @@ void progress_print(progress_state* progress) {
 }
 
 FILE* initialize_image(const char* image_name, int height, int width) {
-    FILE* pgimg;
-    pgimg = fopen(image_name, "wb");
-    if(pgimg == NULL) {
+    FILE* picture_file;
+    picture_file = fopen(image_name, "wb");
+    if(picture_file == NULL) {
         fprintf(stderr, "Error initializing image\n");
         return NULL;
     }
-    fprintf(pgimg, "P3\n"); 
-    fprintf(pgimg, "%d %d\n", width, height);
-    fprintf(pgimg, "255\n");
-    return pgimg;
+    fprintf(picture_file, "P3\n"); 
+    fprintf(picture_file, "%d %d\n", width, height);
+    fprintf(picture_file, "255\n");
+    return picture_file;
 }
 
-void deseneaza_mandelbrot(
+uint32_t* deseneaza_mandelbrot(
     const char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real,
     double top_left_coord_imaginar, double pixel_width, int num_iters,
     double rotate_degrees, double brightness, int (*red_mapping_func)(int, int),
     int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
 ) {
     color_palette palette;
-
     if(generate_color_palette(&palette, brightness, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
-        return;
+        return NULL;
     }
 
-    FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
-    if(pgimg == NULL) {
-        return;
+    FILE* picture_file = NULL;
+    uint32_t* picture_array;
+    int i_array = 0;
+    if (nume_poza != NULL) {
+        picture_file = initialize_image(nume_poza, inaltime_poza, latime_poza);
+        if(picture_file == NULL) {
+            return NULL;
+        }
+    } else {
+        picture_array = (uint32_t*) malloc((uint32_t) (inaltime_poza * latime_poza * RGB_CHANNELS) * sizeof *picture_array);
     }
 
     int numar_pixeli = inaltime_poza * latime_poza;
@@ -139,22 +146,37 @@ void deseneaza_mandelbrot(
             roteste(&real_rotit, &im_rotit, -0.75, 0, rotate_degrees);
             
             int iter_count = diverge(real_rotit, im_rotit, num_iters, mandelbrot_quadratic);
-            fprintf(pgimg, "%d %d %d\n",
-                    palette.r[palette.rgb[iter_count][0]],
-                    palette.g[palette.rgb[iter_count][1]],
-                    palette.b[palette.rgb[iter_count][2]]
-            );
+
+            if (picture_file) {
+                fprintf(picture_file, "%d %d %d\n",
+                        palette.r[palette.rgb[iter_count][0]],
+                        palette.g[palette.rgb[iter_count][1]],
+                        palette.b[palette.rgb[iter_count][2]]
+                );
+            } else {
+                i_array = j + (j * i);
+                picture_array[i_array++] = (uint32_t) palette.r[palette.rgb[iter_count][0]];
+                picture_array[i_array++] = (uint32_t) palette.g[palette.rgb[iter_count][1]];
+                picture_array[i_array]   = (uint32_t) palette.b[palette.rgb[iter_count][2]];
+            }
+
             parte_reala += pixel_width;
 
             progress_print(&progress);
         }
-        fprintf(pgimg, "\n");
+        if (picture_file) {
+            fprintf(picture_file, "\n");
+        }
         parte_imaginara -= pixel_width;
     }
-    fclose(pgimg);
+    if (picture_file) {
+        fclose(picture_file);
+        return NULL;
+    }
+    return picture_array;
 }
 
-void mandelbrot_around_center(
+uint32_t* mandelbrot_around_center(
     const char *nume_poza, int inaltime_poza, int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
@@ -165,7 +187,7 @@ void mandelbrot_around_center(
     double top_left_coord_real =     center_coord_real - (double)latime_poza / 2 * pixel_width;
     double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
-    deseneaza_mandelbrot(
+    return deseneaza_mandelbrot(
         nume_poza, inaltime_poza, latime_poza,
         top_left_coord_real, top_left_coord_imaginar, pixel_width,
         num_iters, rotate_degrees, brightness,
