@@ -85,8 +85,10 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SANITIZER_THREAD "-fsanitize=thread")
     set(SANITIZER_UNDEFINED "-fsanitize=undefined")
 
-    # Include the tests
-    include(${CMAKE_CURRENT_SOURCE_DIR}/tests/Tests.cmake)
+    if(ENABLE_TESTS EQUAL TRUE)
+        # Include the tests
+        include(${CMAKE_CURRENT_SOURCE_DIR}/tests/Tests.cmake)
+    endif()
 
     # Add debug flags
     add_compile_options(${DEBUG_FLAGS})
@@ -108,6 +110,7 @@ if(WIN32)
 endif()
 
 set_target_properties(${DLL} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 
 
 ##################################################################
