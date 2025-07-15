@@ -106,8 +106,8 @@ FILE* initialize_image(const char* image_name, int height, int width) {
 uint32_t* deseneaza_mandelbrot(
     const char *nume_poza, int inaltime_poza, int latime_poza, double top_left_coord_real,
     double top_left_coord_imaginar, double pixel_width, int num_iters,
-    double rotate_degrees, double brightness, int (*red_mapping_func)(int, int),
-    int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+    double rotate_degrees, double brightness, uint8_t (*red_mapping_func)(int, int),
+    uint8_t (*green_mapping_func)(int, int), uint8_t (*blue_mapping_func)(int, int)
 ) {
     color_palette palette;
     if(generate_color_palette(&palette, brightness, NULL, red_mapping_func, green_mapping_func, blue_mapping_func) == EXIT_FAILURE) {
@@ -116,6 +116,7 @@ uint32_t* deseneaza_mandelbrot(
 
     FILE* picture_file = NULL;
     uint32_t* picture_array = NULL;
+    uint32_t array_size = (uint32_t) (inaltime_poza * latime_poza * RGB_CHANNELS);
     int i_array = 0;
     if (nume_poza) {
         picture_file = initialize_image(nume_poza, inaltime_poza, latime_poza);
@@ -123,7 +124,7 @@ uint32_t* deseneaza_mandelbrot(
             return NULL;
         }
     } else {
-        picture_array = (uint32_t*) malloc((uint32_t) (inaltime_poza * latime_poza * RGB_CHANNELS) * sizeof *picture_array);
+        picture_array = (uint32_t*) malloc(array_size * sizeof *picture_array);
         if (!picture_array) {
             fprintf(stderr, "Failed allocating memory for picture\n");
             return NULL;
@@ -184,7 +185,7 @@ uint32_t* mandelbrot_around_center(
     const char *nume_poza, int inaltime_poza, int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
     int num_iters, double rotate_degrees, double brightness,
-    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int)
+    uint8_t (*red_mapping_func)(int, int), uint8_t (*green_mapping_func)(int, int), uint8_t (*blue_mapping_func)(int, int)
 ) {
     int latura_scurta =             (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     double pixel_width =             radius * 2 / latura_scurta;
