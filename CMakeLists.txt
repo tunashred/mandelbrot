@@ -11,12 +11,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(mandelbrot VERSION 0.1.0 LANGUAGES C CXX)
 
 # Include header files
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Find all source files
 file(GLOB C_SOURCES "src/*.c")
 
-set(MAIN_FILE_PATH "${CMAKE_SOURCE_DIR}/src/main.c")
+set(MAIN_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c")
 
 # Removing main.c because it would link to other executables
 list(REMOVE_ITEM C_SOURCES "${MAIN_FILE_PATH}")
@@ -69,7 +69,7 @@ function(generate_assembly_for_file SRC_FILE)
     get_filename_component(FILE_NAME ${SRC_FILE} NAME_WE)
     add_custom_target(
         ${FILE_NAME}_assembly
-        COMMAND ${CMAKE_C_COMPILER} ${DEBUG_FLAGS} -I${CMAKE_SOURCE_DIR}/include -S ${SRC_FILE} -o ${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.s
+        COMMAND ${CMAKE_C_COMPILER} ${DEBUG_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}/include -S ${SRC_FILE} -o ${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.s
         COMMENT "Generating assembly file for ${FILE_NAME}.c"
     )
 endfunction()
@@ -86,7 +86,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SANITIZER_UNDEFINED "-fsanitize=undefined")
 
     # Include the tests
-    include(${CMAKE_SOURCE_DIR}/tests/Tests.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/tests/Tests.cmake)
 
     # Add debug flags
     add_compile_options(${DEBUG_FLAGS})
