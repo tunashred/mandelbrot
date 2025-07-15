@@ -115,15 +115,19 @@ uint32_t* deseneaza_mandelbrot(
     }
 
     FILE* picture_file = NULL;
-    uint32_t* picture_array;
+    uint32_t* picture_array = NULL;
     int i_array = 0;
-    if (nume_poza != NULL) {
+    if (nume_poza) {
         picture_file = initialize_image(nume_poza, inaltime_poza, latime_poza);
-        if(picture_file == NULL) {
+        if(!picture_file) {
             return NULL;
         }
     } else {
         picture_array = (uint32_t*) malloc((uint32_t) (inaltime_poza * latime_poza * RGB_CHANNELS) * sizeof *picture_array);
+        if (!picture_array) {
+            fprintf(stderr, "Failed allocating memory for picture\n");
+            return NULL;
+        }
     }
 
     int numar_pixeli = inaltime_poza * latime_poza;

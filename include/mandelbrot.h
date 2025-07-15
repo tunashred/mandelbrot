@@ -10,6 +10,8 @@ extern "C" {
 #include <math.h>
 #include <stdint.h>
 
+typedef int (*color_mapping_func)(int, int);
+
 // calculeaza f꜀(z) = z² + c
 void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
 
