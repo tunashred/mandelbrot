@@ -15,10 +15,10 @@ extern "C" {
 #define NUM_COLORS 1500
 
 typedef struct {
-    int r[NUM_COLORS];
-    int g[NUM_COLORS];
-    int b[NUM_COLORS];
-    int rgb[NUM_COLORS][RGB_CHANNELS];
+    uint8_t r[NUM_COLORS];
+    uint8_t g[NUM_COLORS];
+    uint8_t b[NUM_COLORS];
+    uint8_t rgb[NUM_COLORS][RGB_CHANNELS];
 } color_palette;
 
 double linear_map(double from, double from_min, double from_max, double to_min, double to_max);
