@@ -159,7 +159,7 @@ uint32_t* deseneaza_mandelbrot(
                         palette.b[palette.rgb[iter_count][2]]
                 );
             } else {
-                i_array = j + (j * i);
+                i_array = (j + latime_poza * i) * RGB_CHANNELS;
                 picture_array[i_array++] = (uint32_t) palette.r[palette.rgb[iter_count][0]];
                 picture_array[i_array++] = (uint32_t) palette.g[palette.rgb[iter_count][1]];
                 picture_array[i_array]   = (uint32_t) palette.b[palette.rgb[iter_count][2]];
