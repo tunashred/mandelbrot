@@ -124,7 +124,7 @@ uint32_t* deseneaza_mandelbrot(
             return NULL;
         }
     } else {
-        picture_array = (uint32_t*) malloc(array_size * sizeof *picture_array);
+        picture_array = (uint32_t*) malloc(array_size * sizeof(uint32_t));
         if (!picture_array) {
             fprintf(stderr, "Failed allocating memory for picture\n");
             return NULL;
@@ -160,9 +160,9 @@ uint32_t* deseneaza_mandelbrot(
                 );
             } else {
                 i_array = (j + latime_poza * i) * RGB_CHANNELS;
-                picture_array[i_array++] = (uint32_t) palette.r[palette.rgb[iter_count][0]];
-                picture_array[i_array++] = (uint32_t) palette.g[palette.rgb[iter_count][1]];
-                picture_array[i_array]   = (uint32_t) palette.b[palette.rgb[iter_count][2]];
+                picture_array[i_array] = (uint32_t) palette.r[palette.rgb[iter_count][0]];
+                picture_array[i_array + 1] = (uint32_t) palette.g[palette.rgb[iter_count][1]];
+                picture_array[i_array + 2]   = (uint32_t) palette.b[palette.rgb[iter_count][2]];
             }
 
             parte_reala += pixel_width;
