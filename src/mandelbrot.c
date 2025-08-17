@@ -71,25 +71,6 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
     *imaginar = sin(radiani) * raza + centru_im;
 }
 
-void progress_print(progress_state* progress) {
-    if(progress->current_pixel++ == progress->pixel_waypoint) {
-        int num_dots = progress->current_procent % 4;
-        int num_spaces = 3 - num_dots;
-
-        printf("\r\033[K%d%% complete %.*s%*s %c", 
-            progress->current_procent, 
-            num_dots, 
-            "...",
-            num_spaces,
-            "",
-            progress->symbols[progress->current_procent % progress->symbols_count]
-        );
-        fflush(stdout);
-        progress->pixel_waypoint += progress->pixel_per_procent;
-        progress->current_procent++;
-    }
-}
-
 FILE* initialize_image(const char* image_name, const int height, const int width) {
     FILE* pgimg;
     pgimg = fopen(image_name, "wb");
@@ -105,18 +86,6 @@ FILE* initialize_image(const char* image_name, const int height, const int width
 
 void* deseneaza_mandelbrot(void* worker_task) {
     worker_task_info* task = (worker_task_info*) worker_task;
-    // TODO: add it as a image_info var
-    const int numar_pixeli = *(task->image_info->height) * *(task->image_info->width);
-    progress_state progress = (progress_state) {
-        .total_pixels = &numar_pixeli,
-        .pixel_per_procent = numar_pixeli / 100,
-        .current_pixel = 0,
-        .current_procent = 0,
-        .pixel_waypoint = 0,
-        .symbols = "|/-\\",
-        .symbols_count = 4
-    };
-
     color_palette palette = *task->palette;
 
     double parte_imaginara = task->image_slice.slice_top_left_coor_im;

@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include <mandelbrot.h>
 #include <color_mapping.h>
 
