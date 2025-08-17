@@ -1,6 +1,9 @@
 #include "mandelbrot.h"
 #include "color_mapping.h"
-#include "thread_utils.h"
+#include "thread_pool.h"
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
     *rez_real = pow(z_real, 2) - pow(z_im, 2) + c_real;
@@ -84,44 +87,43 @@ FILE* initialize_image(const char* image_name, const int height, const int width
     return pgimg;
 }
 
-void* deseneaza_mandelbrot(void* worker_task) {
+void deseneaza_mandelbrot(void* worker_task) {
     worker_task_info* task = (worker_task_info*) worker_task;
     color_palette palette = *task->palette;
+    uint32_t* buffer = task->image_info->buffer;
 
     double parte_imaginara = task->image_slice.slice_top_left_coor_im;
     for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
-        double parte_reala = *task->image_info->top_left_coord_real;
-        int width_offset = (i * *task->image_info->width) * RGB_CHANNELS,
+        double parte_reala = task->image_info->top_left_coord_real;
+        int width_offset = (i * task->image_info->width) * RGB_CHANNELS,
         end_width        = task->image_slice.end_width * RGB_CHANNELS;
         for(int j = task->image_slice.start_width; j < end_width; j += RGB_CHANNELS) {
             double real_rotit = parte_reala,
                    im_rotit   = parte_imaginara;
-            roteste(&real_rotit, &im_rotit, -0.75, 0, *task->image_info->rotate_degrees);
+            roteste(&real_rotit, &im_rotit, -0.75, 0, task->image_info->rotate_degrees);
 
-            int iter_count = diverge(real_rotit, im_rotit, *task->image_info->num_iters, task->image_info->mandelbrot_func);
+            int iter_count = diverge(real_rotit, im_rotit, task->image_info->num_iters, task->image_info->mandelbrot_func);
 
-            int r = palette.r[palette.rgb[iter_count][0]];
-            int g = palette.g[palette.rgb[iter_count][1]];
-            int b = palette.b[palette.rgb[iter_count][2]];
+            uint32_t r = palette.r[palette.rgb[iter_count][0]];
+            uint32_t g = palette.g[palette.rgb[iter_count][1]];
+            uint32_t b = palette.b[palette.rgb[iter_count][2]];
 
             int index = width_offset + j;
-            task->buffer[index]     = r;
-            task->buffer[index + 1] = g;
-            task->buffer[index + 2] = b;
+            buffer[index]     = r;
+            buffer[index + 1] = g;
+            buffer[index + 2] = b;
 
-            parte_reala += *task->image_info->pixel_width;
+            parte_reala += task->image_info->pixel_width;
         }
-        parte_imaginara -= *task->image_info->pixel_width;
+        parte_imaginara -= task->image_info->pixel_width;
     }
-
-    return NULL;
 }
 
-int* buffer_init(int rows, int columns) {
+uint32_t* buffer_init(int rows, int columns) {
     size_t total_size = (size_t)rows * (size_t)columns;
-    int* buffer = (int*) malloc(total_size * sizeof(int));
+    uint32_t* buffer = malloc(total_size * sizeof(uint32_t));
     // "touching" the buffer to make sure the memory was *really* allocated
-    memset(buffer, 0, (size_t)(total_size * sizeof(int)));
+    memset(buffer, 0, (size_t)(total_size * sizeof(uint32_t)));
     return buffer;
 }
 
@@ -130,52 +132,65 @@ void free_buffer(int* buffer) {
     buffer = NULL;
 }
 
-void mandelbrot_around_center(
-    const char *nume_poza, const int inaltime_poza, const int latime_poza,
+image_info* mandelbrot_around_center(
+    const int inaltime_poza, const int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
-    int num_iters, double rotate_degrees, double brightness,
-    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
-    void (*mandelbrot_func)(double, double, double, double, double*, double*), const u_int64_t thread_count
+    int num_iters, double rotate_degrees,
+    void (*mandelbrot_func)(double, double, double, double, double*, double*)
 ) {
     const int latura_scurta              = (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     const double pixel_width             = radius * 2 / latura_scurta;
     const double top_left_coord_real     = center_coord_real - (double)latime_poza / 2 * pixel_width;
     const double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
-    FILE* pgimg = initialize_image(nume_poza, inaltime_poza, latime_poza);
+    image_info* img_info = malloc(sizeof *img_info);
+    img_info->mandelbrot_func     = mandelbrot_func;
+    img_info->height              = inaltime_poza;
+    img_info->width               = latime_poza;
+    img_info->top_left_coord_real = top_left_coord_real;
+    img_info->top_left_coord_im   = top_left_coord_imaginar;
+    img_info->pixel_width         = pixel_width;
+    img_info->rotate_degrees      = rotate_degrees;
+    img_info->num_iters           = num_iters;
 
-    color_palette palette;
-    generate_color_palette(
-        &palette, NULL, brightness,
-        red_mapping_func, green_mapping_func, blue_mapping_func
-    );
+    uint32_t* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
+    img_info->buffer = buffer;
 
-    image_info img_info = {
-        .mandelbrot_func     = mandelbrot_func,
-        .height              = &inaltime_poza,
-        .width               = &latime_poza,
-        .top_left_coord_real = &top_left_coord_real,
-        .top_left_coord_im   = &top_left_coord_imaginar,
-        .pixel_width         = &pixel_width,
-        .rotate_degrees      = &rotate_degrees,
-        .num_iters           = &num_iters
-    };
+    return img_info;
+}
 
-    int* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
+worker_task_info* start_workers(tpool_t* pool, image_info* img_info, color_palette* palette) {
+    worker_task_info* workers_info = malloc(pool->thread_count * sizeof(worker_task_info));
 
-    job_info* job = start_worker_threads(&thread_count, &palette, &img_info, buffer);
+    const int slice_height = img_info->height / (int)pool->thread_count;
 
-    wait_all_threads(job);
+    for(int i = 0; i < (int)pool->thread_count; i++) {
+        image_slice current_slice = {
+            .start_height = i * slice_height,
+            .end_height   = ((size_t)i == pool->thread_count - 1) ? img_info->height : (i + 1) * slice_height,
+            .slice_top_left_coor_im = img_info->top_left_coord_im -
+                                      (i * slice_height * img_info->pixel_width),
+            .start_width  = 0,
+            .end_width    = img_info->width
+        };
+        workers_info[i].palette = palette;
+        workers_info[i].image_info = img_info;
+        workers_info[i].image_slice = current_slice;
+        tpool_work_add(pool, deseneaza_mandelbrot, (void*)&workers_info[i]);
+    }
+    return workers_info;
+}
 
-    for(int i = 0; i < latime_poza * inaltime_poza * RGB_CHANNELS; i += RGB_CHANNELS) {
-        fprintf(pgimg, "%d %d %d\n",
-            buffer[i],
-            buffer[i + 1],
-            buffer[i + 2]
+void save_image_ppm(const char* image_name, const int height, const int width, uint32_t* data) {
+    FILE* pgimg = initialize_image(image_name, height, width);
+
+    for(int i = 0; i < height * width * RGB_CHANNELS; i += RGB_CHANNELS) {
+        fprintf(pgimg, "%u %u %u\n",
+            data[i],
+            data[i + 1],
+            data[i + 2]
         );
     }
-
-    free_buffer(buffer);
 
     fclose(pgimg);
 }

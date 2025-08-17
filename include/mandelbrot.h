@@ -1,16 +1,14 @@
 #ifndef MANDELBROT_H
 #define MANDELBROT_H
 
-#include <sys/types.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <stdint.h>
+#include <sys/types.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <pthread.h>
-#include <string.h>
+#include "thread_pool.h"
 
 #include "color_mapping.h"
 
@@ -40,15 +38,17 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
 
 FILE* initialize_image(const char* image_name, const int height, const int width);
 
+// TODO: less pointers
 typedef struct {
-    const double* pixel_width;
-    const double* top_left_coord_real;
-    const double* rotate_degrees;
-    const int* num_iters;
-    const int* width;
+    double pixel_width;
+    double top_left_coord_real;
+    double top_left_coord_im;
+    double rotate_degrees;
+    int num_iters;
+    int width;
+    int height;
+    uint32_t* buffer;
     void (*mandelbrot_func)(double, double, double, double, double*, double*);
-    const int* height;
-    const double* top_left_coord_im;
 } image_info;
 
 typedef struct {
@@ -61,24 +61,25 @@ typedef struct {
 
 typedef struct {
     color_palette* palette;
-    int* buffer;
     image_info* image_info;
     image_slice image_slice;
 } worker_task_info;
 
-void* deseneaza_mandelbrot(void* worker_task);
+void deseneaza_mandelbrot(void* worker_task);
 
-int* buffer_init(int rows, int columns);
+uint32_t* buffer_init(int rows, int columns);
 
 void free_buffer(int* buffer);
 
-void mandelbrot_around_center(
-    const char* nume_poza, const int inaltime_poza, const int latime_poza,
+image_info* mandelbrot_around_center(
+    const int inaltime_poza, const int latime_poza,
     double center_coord_real, double center_coord_imaginar, double radius,
-    int num_iters, double rotate_degrees, double brightness,
-    int (*red_mapping_func)(int, int), int (*green_mapping_func)(int, int), int (*blue_mapping_func)(int, int),
-    void (*mandelbrot_func)(double, double, double, double, double*, double*), const u_int64_t thread_count
-);
+    int num_iters, double rotate_degrees,
+    void (*mandelbrot_func)(double, double, double, double, double*, double*));
+
+worker_task_info* start_workers(tpool_t* pool, image_info* img_info, color_palette* palette);
+
+void save_image_ppm(const char* image_name, const int height, const int width, uint32_t* data);
 
 #ifdef __cplusplus
 }
