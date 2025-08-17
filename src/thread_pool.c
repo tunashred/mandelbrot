@@ -170,5 +170,4 @@ void tpool_destroy(tpool_t* tpool) {
     pthread_cond_destroy(&tpool->working_cond);
 
     free(tpool);
-    tpool = NULL;
 }
