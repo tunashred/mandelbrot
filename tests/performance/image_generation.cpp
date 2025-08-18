@@ -4,17 +4,6 @@
 
 class ImageGeneration : public ::testing::TestWithParam<std::tuple<int, float>> {
 protected:
-    color_palette palette;
-    image_info* img_info;
-    tpool_t* pool;
-    worker_task_info* tasks;
-    int numThreads;
-    bool is_portrait;
-
-    uint8_t (*color_map_red)(int, int) = sin_x_la_4;
-    uint8_t (*color_map_green)(int, int) = unu_minus_unu_pe_x;
-    uint8_t (*color_map_blue)(int, int) = x_patrat_0_1_to_0_2;
-
     void SetUp() override {
         int threads;
         float scale;
@@ -36,6 +25,13 @@ protected:
         free(img_info->buffer);
         free(img_info);
     }
+public:
+    color_palette palette;
+    image_info* img_info;
+    tpool_t* pool;
+    worker_task_info* tasks;
+    int numThreads;
+    bool is_portrait;
 
     void generate_image(float scale, float x_center, float y_center,
                         float zoom, int num_iters, int brightness, int rotate_degrees) {
@@ -54,8 +50,9 @@ protected:
     static std::string getTestCaseName(const ::testing::TestParamInfo<std::tuple<int, float>>& info) {
         int threads;
         float scale;
+        std::tie(threads, scale) = info.param;
     
-        return "threads_" + std::to_string(threads);
+        return "scale_" + std::to_string(scale) + "_threads_" + std::to_string(threads);
     }
 };
 
@@ -67,7 +64,9 @@ TEST_P(ImageGeneration, Mandelbrot) {
     std::tie(threads, scale) = this->GetParam();
 
     generate_image(scale, -0.43, -0.1, 1, 1500, 0, 0);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGenerationExtra, Mandelbrot) {
@@ -76,7 +75,9 @@ TEST_P(ImageGenerationExtra, Mandelbrot) {
     std::tie(threads, scale) = this->GetParam();
 
     generate_image(scale, -0.43, -0.1, 1, 1500, 0, 0);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGeneration, Galaxy) {
@@ -86,7 +87,9 @@ TEST_P(ImageGeneration, Galaxy) {
 
     is_portrait = true;
     generate_image(scale, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035, 1500, 0, 0);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 // Galaxy Extra Tests
@@ -97,7 +100,9 @@ TEST_P(ImageGenerationExtra, Galaxy) {
 
     is_portrait = true;
     generate_image(scale, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035, 1500, 0, 0);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGeneration, Stuff) {
@@ -107,7 +112,9 @@ TEST_P(ImageGeneration, Stuff) {
 
     is_portrait = true;
     generate_image(scale, -0.7, -0.26, 0.01, 1500, 0, 1);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGenerationExtra, Stuff) {
@@ -117,7 +124,9 @@ TEST_P(ImageGenerationExtra, Stuff) {
 
     is_portrait = true;
     generate_image(scale, -0.7, -0.26, 0.01, 1500, 0, 1);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGeneration, Seastar) {
@@ -127,7 +136,9 @@ TEST_P(ImageGeneration, Seastar) {
 
     is_portrait = true;
     generate_image(scale, -0.72413, 0.28644, 0.0004, 1500, 0, 1);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGenerationExtra, Seastar) {
@@ -137,7 +148,9 @@ TEST_P(ImageGenerationExtra, Seastar) {
 
     is_portrait = true;
     generate_image(scale, -0.72413, 0.28644, 0.0004, 1500, 0, 1);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGeneration, Shells) {
@@ -147,7 +160,9 @@ TEST_P(ImageGeneration, Shells) {
 
     is_portrait = true;
     generate_image(scale, -0.75 + 0.00005, -0.02, 0.00025, 1500, 0, 1);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 TEST_P(ImageGenerationExtra, Shells) {
@@ -157,7 +172,9 @@ TEST_P(ImageGenerationExtra, Shells) {
 
     is_portrait = true;
     generate_image(scale, -0.75 + 0.00005, -0.02, 0.00025, 1500, 0, 1);
+
     RecordProperty("scale", scale);
+    RecordProperty("threads", threads);
 }
 
 std::vector<int> numThreads = {6, 8, 12};
