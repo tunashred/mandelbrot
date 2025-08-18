@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="45" failures="0" disabled="0" errors="0" time="263.985" timestamp="2025-08-18T09:21:40.281" name="AllTests">
+  <testsuite name="mandatory_images/ImageGeneration" tests="45" failures="0" disabled="0" skipped="0" errors="0" time="263.985" timestamp="2025-08-18T09:21:40.281">
+    <testcase name="Mandelbrot/0" value_param="(6, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="1.179" timestamp="2025-08-18T09:21:40.281" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/1" value_param="(6, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="4.722" timestamp="2025-08-18T09:21:41.460" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/2" value_param="(6, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="18.779" timestamp="2025-08-18T09:21:46.182" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/3" value_param="(8, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="0.903" timestamp="2025-08-18T09:22:04.961" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/4" value_param="(8, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="3.607" timestamp="2025-08-18T09:22:05.865" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/5" value_param="(8, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="14.562" timestamp="2025-08-18T09:22:09.472" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/6" value_param="(12, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="0.624" timestamp="2025-08-18T09:22:24.035" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/7" value_param="(12, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="2.587" timestamp="2025-08-18T09:22:24.659" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Mandelbrot/8" value_param="(12, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="61" status="run" result="completed" time="10.045" timestamp="2025-08-18T09:22:27.246" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/0" value_param="(6, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="0.711" timestamp="2025-08-18T09:22:37.292" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/1" value_param="(6, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="2.872" timestamp="2025-08-18T09:22:38.004" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/2" value_param="(6, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="11.458" timestamp="2025-08-18T09:22:40.876" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/3" value_param="(8, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="0.552" timestamp="2025-08-18T09:22:52.335" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/4" value_param="(8, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="2.222" timestamp="2025-08-18T09:22:52.887" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/5" value_param="(8, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="8.783" timestamp="2025-08-18T09:22:55.109" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/6" value_param="(12, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="0.504" timestamp="2025-08-18T09:23:03.893" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/7" value_param="(12, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="1.855" timestamp="2025-08-18T09:23:04.398" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Galaxy/8" value_param="(12, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="81" status="run" result="completed" time="6.954" timestamp="2025-08-18T09:23:06.253" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/0" value_param="(6, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="1.546" timestamp="2025-08-18T09:23:13.207" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/1" value_param="(6, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="6.202" timestamp="2025-08-18T09:23:14.753" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/2" value_param="(6, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="24.723" timestamp="2025-08-18T09:23:20.956" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/3" value_param="(8, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="1.246" timestamp="2025-08-18T09:23:45.680" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/4" value_param="(8, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="4.906" timestamp="2025-08-18T09:23:46.927" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/5" value_param="(8, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="19.636" timestamp="2025-08-18T09:23:51.833" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/6" value_param="(12, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="0.887" timestamp="2025-08-18T09:24:11.469" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/7" value_param="(12, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="3.698" timestamp="2025-08-18T09:24:12.357" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Stuff/8" value_param="(12, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="104" status="run" result="completed" time="14.257" timestamp="2025-08-18T09:24:16.055" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/0" value_param="(6, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="0.145" timestamp="2025-08-18T09:24:30.312" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/1" value_param="(6, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="0.589" timestamp="2025-08-18T09:24:30.457" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/2" value_param="(6, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="2.349" timestamp="2025-08-18T09:24:31.046" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/3" value_param="(8, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="0.111" timestamp="2025-08-18T09:24:33.396" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/4" value_param="(8, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="0.45" timestamp="2025-08-18T09:24:33.508" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/5" value_param="(8, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="1.841" timestamp="2025-08-18T09:24:33.959" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/6" value_param="(12, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="0.131" timestamp="2025-08-18T09:24:35.800" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/7" value_param="(12, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="0.385" timestamp="2025-08-18T09:24:35.932" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Seastar/8" value_param="(12, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="126" status="run" result="completed" time="1.456" timestamp="2025-08-18T09:24:36.318" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/0" value_param="(6, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="1.705" timestamp="2025-08-18T09:24:37.774" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/1" value_param="(6, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="6.83" timestamp="2025-08-18T09:24:39.479" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/2" value_param="(6, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="27.317" timestamp="2025-08-18T09:24:46.310" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="6"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/3" value_param="(8, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="1.341" timestamp="2025-08-18T09:25:13.627" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/4" value_param="(8, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="5.521" timestamp="2025-08-18T09:25:14.969" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/5" value_param="(8, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="21.512" timestamp="2025-08-18T09:25:20.490" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="8"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/6" value_param="(12, 1)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="1.076" timestamp="2025-08-18T09:25:42.002" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="1"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/7" value_param="(12, 2)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="4.388" timestamp="2025-08-18T09:25:43.079" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="2"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+    <testcase name="Shells/8" value_param="(12, 4)" file="/home/alex/code_stuff/github.com/tunashred/mandelbrot/tests/performance/image_generation.cpp" line="148" status="run" result="completed" time="16.798" timestamp="2025-08-18T09:25:47.468" classname="mandatory_images/ImageGeneration">
+      <properties>
+        <property name="scale" value="4"/>
+        <property name="threads" value="12"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>
