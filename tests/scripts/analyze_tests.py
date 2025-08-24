@@ -26,6 +26,8 @@ class Colors:
 class TestResult:
     """Represents a single test result with its properties"""
     name: str
+    classname: str
+    testsuite_name: str
     time: float
     properties: Dict[str, str]
 
@@ -34,6 +36,43 @@ class TestResult:
         # Sort properties for consistent signature
         prop_str = "_".join(f"{k}:{v}" for k, v in sorted(self.properties.items()))
         return f"{self.name}_{prop_str}"
+
+    def get_full_name(self) -> str:
+        """Get the full test name including classname for display purposes"""
+        if self.classname:
+            return f"{self.classname}.{self.name}"
+        return self.name
+
+    def get_class_path(self) -> str:
+        """Get just the class path without test parameters for concise display"""
+        if self.classname:
+            return self.classname
+        return self.name.split('/')[0] if '/' in self.name else self.name
+
+    def get_data_type(self) -> str:
+        """Extract data type from testsuite name"""
+        if not self.testsuite_name:
+            return ""
+
+        # Look for common data type patterns at the end of testsuite name
+        testsuite_parts = self.testsuite_name.split('/')
+        if len(testsuite_parts) >= 2:
+            class_part = testsuite_parts[-1]  # e.g., "AlignedMatrixSharedInt"
+
+            # Common data types to look for
+            data_types = ['Int', 'Double', 'Float', 'Long', 'Short', 'Char']
+            for dtype in data_types:
+                if class_part.endswith(dtype):
+                    return dtype
+
+        return ""
+
+    def get_display_name(self) -> str:
+        """Get test name with data type for display"""
+        data_type = self.get_data_type()
+        if data_type:
+            return f"{self.name} ({data_type})"
+        return self.name
 
 
 class TestRegessionAnalyzer:
@@ -55,29 +94,33 @@ class TestRegessionAnalyzer:
         tests = {}
 
         # Find all testcase elements
-        for testcase in root.findall(".//testcase"):
-            name = testcase.get("name", "")
-            time_str = testcase.get("time", "0")
+        for testsuite in root.findall(".//testsuite"):
+            testsuite_name = testsuite.get("name", "")
 
-            try:
-                time = float(time_str)
-            except ValueError:
-                print(f"Warning: Invalid time value '{time_str}' for test {name}")
-                continue
+            for testcase in testsuite.findall("testcase"):
+                name = testcase.get("name", "")
+                classname = testcase.get("classname", "")
+                time_str = testcase.get("time", "0")
 
-            # Extract properties
-            properties = {}
-            properties_elem = testcase.find("properties")
-            if properties_elem is not None:
-                for prop in properties_elem.findall("property"):
-                    prop_name = prop.get("name", "")
-                    prop_value = prop.get("value", "")
-                    if prop_name:
-                        properties[prop_name] = prop_value
+                try:
+                    time = float(time_str)
+                except ValueError:
+                    print(f"Warning: Invalid time value '{time_str}' for test {name}")
+                    continue
 
-            test_result = TestResult(name, time, properties)
-            signature = test_result.get_signature()
-            tests[signature] = test_result
+                # Extract properties
+                properties = {}
+                properties_elem = testcase.find("properties")
+                if properties_elem is not None:
+                    for prop in properties_elem.findall("property"):
+                        prop_name = prop.get("name", "")
+                        prop_value = prop.get("value", "")
+                        if prop_name:
+                            properties[prop_name] = prop_value
+
+                test_result = TestResult(name, classname, testsuite_name, time, properties)
+                signature = test_result.get_signature()
+                tests[signature] = test_result
 
         return tests
 
@@ -99,14 +142,14 @@ class TestRegessionAnalyzer:
             print(f"Info: {len(input_only)} test(s) found only in input file:")
             for sig in sorted(input_only):
                 test = input_tests[sig]
-                print(f"    {test.name} {test.properties}")
+                print(f"    {test.get_full_name()} {test.properties}")
             print()
 
         if baseline_only:
             print(f"Info: {len(baseline_only)} test(s) found only in baseline file:")
             for sig in sorted(baseline_only):
                 test = baseline_tests[sig]
-                print(f"    {test.name} {test.properties}")
+                print(f"    {test.get_full_name()} {test.properties}")
             print()
 
         if not common_tests:
@@ -130,7 +173,8 @@ class TestRegessionAnalyzer:
             # Handle zero baseline time
             if baseline_time == 0:
                 if input_time > 0:
-                    print(f"⚠️  Warning: {input_test.name} has zero baseline time but {input_time}s input time")
+                    print(
+                        f"⚠️  Warning: {input_test.get_full_name()} has zero baseline time but {input_time}s input time")
                 continue
 
             # Calculate percentage change: (input - baseline) / baseline
@@ -158,9 +202,17 @@ class TestRegessionAnalyzer:
             print(f"{Colors.RED}PERFORMANCE REGRESSIONS:{Colors.RESET}")
             for input_test, baseline_test, change_percent, time_diff in regressions:
                 props_str = ", ".join(f"{k}={v}" for k, v in input_test.properties.items())
-                print(f"  {input_test.name} ({props_str})")
-                print(f"     Baseline: {baseline_test.time:.3f}s -> Input: {input_test.time:.3f}s")
-                print(f"     Regression: {change_percent:+.1f}% (+{time_diff:.3f}s)")
+                display_name = input_test.get_display_name()
+                if props_str:
+                    print(f"  {Colors.BLUE}Test:{Colors.RESET} {display_name} ({props_str})")
+                else:
+                    print(f"  {Colors.BLUE}Test:{Colors.RESET} {display_name}")
+                print(
+                    f"     {Colors.YELLOW}Baseline:{Colors.RESET} {baseline_test.get_class_path()} -> {Colors.BOLD}{baseline_test.time:.3f}s{Colors.RESET}")
+                print(
+                    f"     {Colors.YELLOW}Input:{Colors.RESET}    {input_test.get_class_path()} -> {Colors.BOLD}{input_test.time:.3f}s{Colors.RESET}")
+                print(
+                    f"     Regression: {Colors.RED}{change_percent:+.1f}%{Colors.RESET} ({Colors.RED}+{time_diff:.3f}s{Colors.RESET})")
             print()
 
     def _print_improvements(self, improvements):
@@ -169,9 +221,17 @@ class TestRegessionAnalyzer:
             print(f"{Colors.GREEN}PERFORMANCE IMPROVEMENTS:{Colors.RESET}")
             for input_test, baseline_test, change_percent, time_saved in improvements:
                 props_str = ", ".join(f"{k}={v}" for k, v in input_test.properties.items())
-                print(f"  {input_test.name} ({props_str})")
-                print(f"     Baseline: {baseline_test.time:.3f}s -> Input: {input_test.time:.3f}s")
-                print(f"     Improvement: {change_percent:.1f}% (-{time_saved:.3f}s)")
+                display_name = input_test.get_display_name()
+                if props_str:
+                    print(f"  {Colors.BLUE}Test:{Colors.RESET} {display_name} ({props_str})")
+                else:
+                    print(f"  {Colors.BLUE}Test:{Colors.RESET} {display_name}")
+                print(
+                    f"     {Colors.YELLOW}Baseline:{Colors.RESET} {baseline_test.get_class_path()} -> {Colors.BOLD}{baseline_test.time:.3f}s{Colors.RESET}")
+                print(
+                    f"     {Colors.YELLOW}Input:{Colors.RESET}    {input_test.get_class_path()} -> {Colors.BOLD}{input_test.time:.3f}s{Colors.RESET}")
+                print(
+                    f"     Improvement: {Colors.GREEN}{change_percent:.1f}%{Colors.RESET} ({Colors.GREEN}-{time_saved:.3f}s{Colors.RESET})")
             print()
 
     def _print_summary(self, total_tests, regressions, improvements, stable):
