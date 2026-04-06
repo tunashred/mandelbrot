@@ -51,7 +51,7 @@ int main() {
     free(img_info->buffer);
     
     // galaxy
-    img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035,1500, 0, mandelbrot_quadratic);
+    img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035, 1500, 0, mandelbrot_quadratic);
     tasks = start_workers(pool, img_info, &palette);
     tpool_wait(pool);
     save_image_ppm("galaxy.ppm", img_info->height, img_info->width, img_info->buffer);
