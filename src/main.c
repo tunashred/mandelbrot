@@ -11,13 +11,13 @@ int main() {
 
     tpool_t* pool = tpool_init(10);
     worker_task_info* tasks;
-    
+
     color_palette palette;
     generate_color_palette(
         &palette, NULL, 1,
-        sin_x_la_4, unu_minus_unu_pe_x, x_patrat_0_1_to_0_2
+        sin_crescator, sin_x_la_4, x_patrat_0_1_to_0_2
     );
-    
+
     // mandelbrot
     image_info* img_info = mandelbrot_around_center(height_landscape, width_landscape, -0.43, -0.1, 1, 1500, 0, mandelbrot_quadratic);
     tasks = start_workers(pool, img_info, &palette);
@@ -25,6 +25,7 @@ int main() {
     save_image_ppm("mandelbrot.ppm", img_info->height, img_info->width, img_info->buffer);
     free(tasks);
     free(img_info->buffer);
+    free(img_info);
 
     // shells
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.75 + 0.00005, -0.02, 0.00025, 1500, 0, mandelbrot_quadratic);
@@ -33,7 +34,8 @@ int main() {
     save_image_ppm("shells.ppm", img_info->height, img_info->width, img_info->buffer);
     free(tasks);
     free(img_info->buffer);
-       
+    free(img_info);
+
     // seastar
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.72413, 0.28644, 0.0004, 1500, 0, mandelbrot_quadratic);
     tasks = start_workers(pool, img_info, &palette);
@@ -41,6 +43,7 @@ int main() {
     save_image_ppm("shells.ppm", img_info->height, img_info->width, img_info->buffer);
     free(tasks);
     free(img_info->buffer);
+    free(img_info);
 
     // stuff
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.7, -0.26, 0.01, 1500, 0, mandelbrot_quadratic);
@@ -49,6 +52,7 @@ int main() {
     save_image_ppm("stuff.ppm", img_info->height, img_info->width, img_info->buffer);
     free(tasks);
     free(img_info->buffer);
+    free(img_info);
     
     // galaxy
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.700025 + 0.000000007, -0.26849991525, 0.0000000035, 1500, 0, mandelbrot_quadratic);
@@ -57,9 +61,9 @@ int main() {
     save_image_ppm("galaxy.ppm", img_info->height, img_info->width, img_info->buffer);
     free(tasks);
     free(img_info->buffer);
+    free(img_info);
 
     tpool_destroy(pool);
-    free(img_info);
 
     return 0;
 }

@@ -4,12 +4,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <mandelbrot.h>
+#include <immintrin.h>
 
 int thread_count = 6;
 // these coordinates diverge at 1451 iterations
-double test_real = -0.44;
-double test_imaginary = -0.56;
-int max_iterations = 1500;
+__m256d test_real = {-0.44, -0.44, -0.44, -0.44};
+__m256d test_imaginary = {-0.56, -0.56, -0.56, -0.56};
+__m128i max_iterations = _mm_set1_epi32(1500);
 
 struct ThreadData {
     int* buffer;
@@ -22,7 +23,7 @@ struct ThreadData {
 void* stress_diverge(void* arg) {
     ThreadData* data = (ThreadData*) arg;
     for (int i = 0; i < data->stress_iterations; ++i) {
-        diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
+        diverge(test_real, test_imaginary, &max_iterations, mandelbrot_quadratic);
     }
     return NULL;
 }
@@ -33,7 +34,7 @@ void* buffer_stress(void* arg) {
     long buffer_size = data->buffer_size;
 
     for (long i = 0; i < data->buffer_size; ++i) {
-        buffer[i] = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
+        _mm_store_epi32((__m128i*)(void*)(buffer + i), diverge(test_real, test_imaginary, &max_iterations, mandelbrot_quadratic));
     }
     return NULL;
 }
@@ -45,7 +46,7 @@ void* shared_buffer_stress(void* arg) {
     long end_index = data->end_index;
 
     for (long i = start_index; i < end_index; ++i) {
-        buffer[i] = diverge(test_real, test_imaginary, max_iterations, mandelbrot_quadratic);
+        _mm_store_epi32((__m128i*)(void*)(buffer + i), diverge(test_real, test_imaginary, &max_iterations, mandelbrot_quadratic));
     }
     return NULL;
 }

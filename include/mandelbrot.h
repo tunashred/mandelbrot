@@ -8,24 +8,20 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 #include <stdio.h>
-#include "thread_pool.h"
+#include <immintrin.h>
 
+#include "thread_pool.h"
 #include "color_mapping.h"
 
-// calculeaza f꜀(z) = z² + c
-void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
+#define SIMD_DOUBLE_WIDTH 4
+#define ALIGNMENT 32
 
-// calculeaza f꜀(z) = z³ + c
-void mandelbrot_cubic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
+typedef void(*mandelbrot_func_t)(const __m256d*, const __m256d*, const __m256d*, const __m256d*, __m256d*, __m256d*);
 
-// calculeaza f꜀(z) = z⁴ + c
-void mandelbrot_quartic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
+void mandelbrot_quadratic(const __m256d* z_real, const __m256d* z_im, const __m256d* c_real, const __m256d* c_im,
+                          __m256d* rez_real, __m256d* rez_im);
 
-// calculeaza f꜀(z) = z⁵ + c
-void mandelbrot_quintic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im);
-
-// verifica daca diverge pentru c_real, c_im
-int diverge(double c_real, double c_im, int num_iters, void (*mandelbrot_func)(double, double, double, double, double*, double*));
+__m128i diverge(__m256d c_real, __m256d c_im, const __m128i* num_iters, mandelbrot_func_t mandelbrot_func);
 
 /*
     1. Determinam lungimea razei folosind Pitagora.
@@ -38,7 +34,6 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
 
 FILE* initialize_image(const char* image_name, const int height, const int width);
 
-// TODO: less pointers
 typedef struct {
     double pixel_width;
     double top_left_coord_real;
@@ -47,8 +42,8 @@ typedef struct {
     int num_iters;
     int width;
     int height;
-    uint32_t* buffer;
-    void (*mandelbrot_func)(double, double, double, double, double*, double*);
+    int* buffer;
+    mandelbrot_func_t mandelbrot_func;
 } image_info;
 
 typedef struct {
@@ -67,19 +62,15 @@ typedef struct {
 
 void deseneaza_mandelbrot(void* worker_task);
 
-uint32_t* buffer_init(int rows, int columns);
+int* buffer_init(int rows, int columns);
 
-void free_buffer(int* buffer);
-
-image_info* mandelbrot_around_center(
-    const int inaltime_poza, const int latime_poza,
-    double center_coord_real, double center_coord_imaginar, double radius,
-    int num_iters, double rotate_degrees,
-    void (*mandelbrot_func)(double, double, double, double, double*, double*));
+image_info* mandelbrot_around_center(const int inaltime_poza, const int latime_poza,
+                                     double center_coord_real, double center_coord_imaginar, double radius,
+                                     int num_iters, double rotate_degrees,mandelbrot_func_t mandelbrot_func);
 
 worker_task_info* start_workers(tpool_t* pool, image_info* img_info, color_palette* palette);
 
-void save_image_ppm(const char* image_name, const int height, const int width, uint32_t* data);
+void save_image_ppm(const char* image_name, const int height, const int width, int* data);
 
 #ifdef __cplusplus
 }

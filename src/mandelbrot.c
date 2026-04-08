@@ -1,70 +1,74 @@
-#include "mandelbrot.h"
-#include "color_mapping.h"
-#include "thread_pool.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <immintrin.h>
 
-void mandelbrot_quadratic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
-    *rez_real = pow(z_real, 2) - pow(z_im, 2) + c_real;
-    *rez_im = 2 * z_real * z_im + c_im;
+#include "mandelbrot.h"
+#include "color_mapping.h"
+#include "thread_pool.h"
+
+void mandelbrot_quadratic(const __m256d* z_real, const __m256d* z_im,
+                          const __m256d* c_real, const __m256d* c_im,
+                          __m256d* rez_real, __m256d* rez_im) {
+    // rez_real = z_real * z_real - z_im * z_im + c_real;
+    *rez_real = _mm256_fmadd_pd(*z_real,
+                                *z_real,
+                                _mm256_fnmadd_pd(*z_im, *z_im, *c_real));
+    // rez_im = 2 * z_real * z_im + c_im;
+    *rez_im = _mm256_fmadd_pd(_mm256_add_pd(*z_real, *z_real),
+                              *z_im,
+                              *c_im);
 }
 
-void mandelbrot_cubic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
-    *rez_real = pow(z_real, 3) - 3 * z_real * pow(z_im, 2) + c_real;
-    *rez_im = 3 * pow(z_real, 2) * z_im - pow(z_im, 3) + c_im;
-}
+__m128i simd_diverge(__m256d c_real, __m256d c_im, const __m128i num_iters, mandelbrot_func_t mandelbrot_func) {
+    static const __m256d SIMD_DOUBLES_TRUE = {-1, -1, -1, -1};
+    static const __m256d SIMD_DOUBLES_2 = {2, 2, 2, 2};
+    static const __m256d SIMD_DOUBLES_MINUS_2 = {-2, -2, -2, -2};
 
-void mandelbrot_quartic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
-    *rez_real = pow(z_real, 4) - 6 * pow(z_real, 2) * pow(z_im, 2) + pow(z_im, 4) + c_real;
-    *rez_im = 4 * pow(z_real, 3) * z_im - 4 * z_real * pow(z_im, 3) + c_im;
-}
+    __m128i i = _mm_set1_epi32(0);
+    __m256d z_real = _mm256_set1_pd(0), z_im = _mm256_set1_pd(0);
+    __m256d z_real_ret, z_im_ret, mask = SIMD_DOUBLES_TRUE;
 
-void mandelbrot_quintic(double z_real, double z_im, double c_real, double c_im, double *rez_real, double *rez_im) {
-    *rez_real = pow(z_real, 5) - 10 * pow(z_real, 3) * pow(z_im, 2) + 5 * z_real * pow(z_im, 4) + c_real;
-    *rez_im = 5 * pow(z_real, 4) * z_im - 10 * pow(z_real, 2) * pow(z_im, 3) + pow(z_im, 5) + c_im;
-}
+    while(_mm256_movemask_pd(mask) != 0) {
+        mandelbrot_func(&z_real, &z_im, &c_real, &c_im, &z_real_ret, &z_im_ret);
 
-int diverge(double c_real, double c_im, int num_iters, void (*mandelbrot_func)(double, double, double, double, double*, double*)) {
-    int i = 0;
-    double z_real = 0, z_im = 0;
-    double z_real_returnat, z_im_returnat;
-    while( z_real <= 2.f && z_real >= -2.f && i++ <= num_iters ) {
-        mandelbrot_func(z_real, z_im, c_real, c_im, &z_real_returnat, &z_im_returnat);
-        z_real = z_real_returnat;
-        z_im = z_im_returnat;
-    }
-    if(i >= num_iters) {
-        // nu diverge
-        return 0;
+        i = _mm_add_epi32(i, _mm_set1_epi32(1));
+
+        __m256d not_diverged = _mm256_cmp_pd(z_real, SIMD_DOUBLES_2, _CMP_LE_OQ);
+        not_diverged = _mm256_and_pd(not_diverged, _mm256_cmp_pd(z_real, SIMD_DOUBLES_MINUS_2, _CMP_GE_OQ));
+
+        __m256d not_max_iter = _mm256_cvtepi32_pd(_mm_cmpgt_epi32(num_iters, i));
+
+        mask = _mm256_and_pd(not_diverged, not_max_iter);
+
+        z_real = _mm256_blendv_pd(z_real, z_real_ret, mask);
+        z_im = _mm256_blendv_pd(z_im, z_im_ret, mask);
     }
     return i;
 }
 
 void roteste(double *real, double *imaginar, double centru_real, double centru_im, double grade) {
-    if(grade == 0) {
+    if (grade == 0) {
         return;
     }
 
     double cateta_reala = *real - centru_real,
-           cateta_im =    *imaginar - centru_im;
-    double raza = sqrt( pow(cateta_reala, 2) + pow(cateta_im, 2) );
+           cateta_im    = *imaginar - centru_im;
+    double raza = sqrt(pow(cateta_reala, 2) + pow(cateta_im, 2));
     double radiani = asin(cateta_im / raza);
 
-    if(cateta_reala < 0) {
-        if(cateta_im > 0) {  // cadranul 2
+    if (cateta_reala < 0) {
+        if (cateta_im > 0) {  // cadranul 2
             radiani = M_PI - radiani;
-        }
-        else {  // cadranul 3
+        }  else {  // cadranul 3
             radiani = -radiani + M_PI;
         }
-    }
-    else if(cateta_im < 0) {  // cadranul 4
+    } else if (cateta_im < 0) {  // cadranul 4
         radiani += 2 * M_PI;
     }
 
     grade += linear_map(radiani, 0, 2 * M_PI, 0, 360);
-    if(grade > 360) {
+    if (grade > 360) {
         grade -= 360;
     }
 
@@ -90,60 +94,84 @@ FILE* initialize_image(const char* image_name, const int height, const int width
 void deseneaza_mandelbrot(void* worker_task) {
     worker_task_info* task = (worker_task_info*) worker_task;
     color_palette palette = *task->palette;
-    uint32_t* buffer = task->image_info->buffer;
+    int* buffer = task->image_info->buffer;
+    image_slice* slice = &task->image_slice;
+    image_info* image = task->image_info;
 
-    double parte_imaginara = task->image_slice.slice_top_left_coor_im;
-    for(int i = task->image_slice.start_height; i < task->image_slice.end_height; i++) {
-        double parte_reala = task->image_info->top_left_coord_real;
-        int width_offset = (i * task->image_info->width) * RGB_CHANNELS,
-        end_width        = task->image_slice.end_width * RGB_CHANNELS;
-        for(int j = task->image_slice.start_width; j < end_width; j += RGB_CHANNELS) {
-            double real_rotit = parte_reala,
-                   im_rotit   = parte_imaginara;
-            roteste(&real_rotit, &im_rotit, -0.75, 0, task->image_info->rotate_degrees);
+    double im_scalar = slice->slice_top_left_coor_im;
+    const __m256d step = _mm256_set1_pd(SIMD_DOUBLE_WIDTH * image->pixel_width);
+    const __m256d lane_offsets = _mm256_set_pd(3 * image->pixel_width,
+                                               2 * image->pixel_width,
+                                               image->pixel_width,
+                                               0 );
 
-            int iter_count = diverge(real_rotit, im_rotit, task->image_info->num_iters, task->image_info->mandelbrot_func);
+    for (int i = slice->start_height; i < slice->end_height; i++) {
+        __m256d im_part = _mm256_set1_pd(im_scalar);
 
-            uint32_t r = palette.r[palette.rgb[iter_count][0]];
-            uint32_t g = palette.g[palette.rgb[iter_count][1]];
-            uint32_t b = palette.b[palette.rgb[iter_count][2]];
+        __m256d real_base = _mm256_add_pd(_mm256_set1_pd(image->top_left_coord_real),
+                                          _mm256_set1_pd(slice->start_width * image->pixel_width));
 
-            int index = width_offset + j;
-            buffer[index]     = r;
-            buffer[index + 1] = g;
-            buffer[index + 2] = b;
+        int width_offset = i * image->width * RGB_CHANNELS;
+        __m256d real_part = _mm256_add_pd(real_base, lane_offsets);
 
-            parte_reala += task->image_info->pixel_width;
+        for (int j = slice->start_width; j + SIMD_DOUBLE_WIDTH <= slice->end_width; j += SIMD_DOUBLE_WIDTH) {
+            double real_rot[4] __attribute__((aligned(ALIGNMENT)));
+            double im_rot[4]   __attribute__((aligned(ALIGNMENT)));
+            _mm256_store_pd(real_rot, real_part);
+            _mm256_store_pd(im_rot, im_part);
+
+            for (int k = 0; k < 4; k++) {
+                roteste(&real_rot[k], &im_rot[k], -0.75, 0, image->rotate_degrees);
+            }
+            __m256d real_rotit = _mm256_load_pd(real_rot);
+            __m256d im_rotit = _mm256_load_pd(im_rot);
+            __m128i iter_count = simd_diverge(real_rotit, im_rotit, _mm_set1_epi32(image->num_iters), image->mandelbrot_func);
+
+            int iters[4] __attribute__((aligned(ALIGNMENT)));
+            _mm_store_si128((__m128i*)iters, iter_count);
+            for (int k = 0; k < 4; k++) {
+                int iter = iters[k] >= image->num_iters ? 0 : iters[k];
+                int r = palette.r[palette.rgb[iter][0]];
+                int g = palette.g[palette.rgb[iter][1]];
+                int b = palette.b[palette.rgb[iter][2]];
+
+                int index = width_offset + (j + k) * RGB_CHANNELS;
+                buffer[index]     = r;
+                buffer[index + 1] = g;
+                buffer[index + 2] = b;
+            }
+            real_part = _mm256_add_pd(real_part, step);
         }
-        parte_imaginara -= task->image_info->pixel_width;
+        im_scalar -= image->pixel_width;
     }
 }
 
-uint32_t* buffer_init(int rows, int columns) {
-    size_t total_size = (size_t)rows * (size_t)columns;
-    uint32_t* buffer = malloc(total_size * sizeof(uint32_t));
+int* buffer_init(int rows, int columns) {
+    size_t total_size = (size_t)rows * (size_t)columns * sizeof(int);
+
+    if (total_size % ALIGNMENT != 0) {
+        total_size += ALIGNMENT - (total_size % ALIGNMENT);
+    }
+
+    int* buffer = aligned_alloc(sizeof(int), total_size);
+    if (!buffer) {
+        fprintf(stderr, "Unable to allocate buffer for image");
+        exit(EXIT_FAILURE);
+    }
     // "touching" the buffer to make sure the memory was *really* allocated
-    memset(buffer, 0, (size_t)(total_size * sizeof(uint32_t)));
+    memset(buffer, 0, total_size);
     return buffer;
 }
 
-void free_buffer(int* buffer) {
-    free(buffer);
-    buffer = NULL;
-}
-
-image_info* mandelbrot_around_center(
-    const int inaltime_poza, const int latime_poza,
-    double center_coord_real, double center_coord_imaginar, double radius,
-    int num_iters, double rotate_degrees,
-    void (*mandelbrot_func)(double, double, double, double, double*, double*)
-) {
+image_info* mandelbrot_around_center(const int inaltime_poza, const int latime_poza,
+                                     double center_coord_real, double center_coord_imaginar, double radius,
+                                     int num_iters, double rotate_degrees, mandelbrot_func_t mandelbrot_func) {
     const int latura_scurta              = (inaltime_poza < latime_poza) ? inaltime_poza : latime_poza;
     const double pixel_width             = radius * 2 / latura_scurta;
     const double top_left_coord_real     = center_coord_real - (double)latime_poza / 2 * pixel_width;
     const double top_left_coord_imaginar = center_coord_imaginar + (double)inaltime_poza / 2 * pixel_width;
 
-    image_info* img_info = malloc(sizeof *img_info);
+    image_info* img_info          = malloc(sizeof *img_info);
     img_info->mandelbrot_func     = mandelbrot_func;
     img_info->height              = inaltime_poza;
     img_info->width               = latime_poza;
@@ -153,7 +181,7 @@ image_info* mandelbrot_around_center(
     img_info->rotate_degrees      = rotate_degrees;
     img_info->num_iters           = num_iters;
 
-    uint32_t* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
+    int* buffer = buffer_init(latime_poza * inaltime_poza, RGB_CHANNELS);
     img_info->buffer = buffer;
 
     return img_info;
@@ -181,7 +209,7 @@ worker_task_info* start_workers(tpool_t* pool, image_info* img_info, color_palet
     return workers_info;
 }
 
-void save_image_ppm(const char* image_name, const int height, const int width, uint32_t* data) {
+void save_image_ppm(const char* image_name, const int height, const int width, int* data) {
     FILE* pgimg = initialize_image(image_name, height, width);
 
     for(int i = 0; i < height * width * RGB_CHANNELS; i += RGB_CHANNELS) {
