@@ -10,6 +10,8 @@ extern "C" {
 #define RGB_CHANNELS 3
 #define NUM_COLORS 1500
 
+typedef uint8_t (*color_mapping_func_t)(int, int);
+
 typedef struct {
     uint8_t r[NUM_COLORS];
     uint8_t g[NUM_COLORS];
@@ -45,15 +47,15 @@ uint8_t sin_x_la_4(int iter_count, int num_iters);
 
 uint8_t mapare_simpla(int iter_count, int num_iters);
 
-uint8_t map_color(int iter_count, int num_iters, uint8_t (*color_mapping_func)(int, int));
+uint8_t map_color(int iter_count, int num_iters, color_mapping_func_t color_mapping_func);
 
 void generate_color_palette(
     color_palette* palette,
     char* palette_file,
     double brightness_rate,
-    uint8_t (*red_func)(int, int),
-    uint8_t (*green_func)(int, int),
-    uint8_t (*blue_func)(int, int)
+    color_mapping_func_t red_func,
+    color_mapping_func_t green_func,
+    color_mapping_func_t blue_func
 );
 
 #ifdef __cplusplus

@@ -8,32 +8,20 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 #include <stdio.h>
-#include <immintrin.h>
 
-#include "thread_pool.h"
 #include "color_mapping.h"
 
-#define SIMD_DOUBLE_WIDTH 4
-#define ALIGNMENT 32
+typedef void(*mandelbrot_func_t)(const double*, const double*, const double*, const double*, double*, double*);
 
-typedef void(*mandelbrot_func_t)(const __m256d*, const __m256d*, const __m256d*, const __m256d*, __m256d*, __m256d*);
+void dummy_mandelbrot_func(const double* z_real, const double* z_im,
+                           const double* c_real, const double* c_im,
+                           double* rez_real, double* rez_im);
 
-void mandelbrot_quadratic(const __m256d* z_real, const __m256d* z_im, const __m256d* c_real, const __m256d* c_im,
-                          __m256d* rez_real, __m256d* rez_im);
-
-__m128i diverge(__m256d c_real, __m256d c_im, const __m128i* num_iters, mandelbrot_func_t mandelbrot_func);
-
-/*
-    1. Determinam lungimea razei folosind Pitagora.
-    2. Determinam unghiul in radiani.
-    3. Aflam in ce cadran mutam punctul si calculam distanta lui fata de punctul (1, 0).
-    4. Convertim radianii in grade si corectam valoarea daca este mai mare decat 360.
-    5. Convertim gradele in radiani si calculam coordonatele reale si imaginare ale punctului rotit.
-*/
-void roteste(double *real, double *imaginar, double centru_real, double centru_im, double grade);
+extern int cuda_diverge(double c_real, double c_im, int num_iters, mandelbrot_func_t mandelbrot_func);
 
 FILE* initialize_image(const char* image_name, const int height, const int width);
 
+// TODO: switch back buffer to uin32_t?
 typedef struct {
     double pixel_width;
     double top_left_coord_real;
@@ -42,35 +30,21 @@ typedef struct {
     int num_iters;
     int width;
     int height;
-    int* buffer;
+    uint32_t* buffer;
     mandelbrot_func_t mandelbrot_func;
 } image_info;
 
-typedef struct {
-    int start_height;
-    int end_height;
-    double slice_top_left_coor_im;
-    int start_width;
-    int end_width;
-} image_slice;
+void deseneaza_mandelbrot(image_info* image_info);
 
-typedef struct {
-    color_palette* palette;
-    image_info* image_info;
-    image_slice image_slice;
-} worker_task_info;
-
-void deseneaza_mandelbrot(void* worker_task);
-
-int* buffer_init(int rows, int columns);
+uint32_t* buffer_init(int rows, int columns);
 
 image_info* mandelbrot_around_center(const int inaltime_poza, const int latime_poza,
                                      double center_coord_real, double center_coord_imaginar, double radius,
-                                     int num_iters, double rotate_degrees,mandelbrot_func_t mandelbrot_func);
+                                     int num_iters, double rotate_degrees, mandelbrot_func_t mandelbrot_func);
 
-worker_task_info* start_workers(tpool_t* pool, image_info* img_info, color_palette* palette);
+void save_image_ppm(const char* image_name, image_info* image_info, color_palette* palette);
 
-void save_image_ppm(const char* image_name, const int height, const int width, int* data);
+extern void cuda_generate_iter_array(image_info* image_info);
 
 #ifdef __cplusplus
 }

@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(mandelbrot VERSION 0.1.0 LANGUAGES C CXX)
+project(mandelbrot VERSION 0.1.0 LANGUAGES C CXX CUDA)
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
+find_package(CUDAToolkit REQUIRED)
 
 set(COMPILE_FLAGS
     -Wall
@@ -19,10 +24,8 @@ set(COMPILE_FLAGS
     -Wunreachable-code
     -fstack-usage
     -pthread
-    -mavx
-    -mavx2
-    -march=native
-    -mtune=native
+    # -march=native
+    # -mtune=native
 )
 
 set(DEBUG_FLAGS
@@ -62,7 +65,15 @@ list(REMOVE_ITEM C_SOURCES "${MAIN_FILE_PATH}")
 
 set(EXECUTABLE "mandelbrot")
 
-add_executable(${EXECUTABLE} ${C_SOURCES} ${MAIN_FILE_PATH})
+add_executable(${EXECUTABLE} ${C_SOURCES} ${MAIN_FILE_PATH} "${CMAKE_SOURCE_DIR}/src/cuda/kernel.cu")
+
+set_target_properties(${EXECUTABLE} PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+)
+
+set_target_properties(${EXECUTABLE} PROPERTIES
+    CUDA_ARCHITECTURES native
+)
 
 target_link_libraries(${EXECUTABLE}
     PRIVATE global_flags
