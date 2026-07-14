@@ -97,36 +97,28 @@ void copy_slice(uint32_t* dest, uint32_t* src, size_t elems) {
 
 // this thing still does not benefit from shared memory
 // and I am pretty sure that the tiling strategy will be changed when stuff will be brought to shared memory
+// TODO: remove slice_size
 __global__
 void _deseneaza_mandelbrot(image_info* d_image_info, int slice_size) {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int base_col = col * slice_size;
 
-    if (base_col >= d_image_info->width || row >= d_image_info->height) {
+    if (col >= d_image_info->width || row >= d_image_info->height) {
         return;
     }
 
     // TODO: warning variable sized static arrays cannot be used in C++
-    uint32_t computed_slice[SLICE_SIZE];
+    // is this the right size? just a full block?
+    __shared__ uint32_t computed_slice[32][32];
 
-    for (int j = 0; j < slice_size; j++) {
-        int pixel_col = base_col + j;
-        if (pixel_col >= d_image_info->width) {
-            break;
-        }
-        
-        double parte_reala     = d_image_info->top_left_coord_real + pixel_col * d_image_info->pixel_width;
-        double parte_imaginara = d_image_info->top_left_coord_im - row * d_image_info->pixel_width;
+    double parte_reala     = d_image_info->top_left_coord_real + col * d_image_info->pixel_width;
+    double parte_imaginara = d_image_info->top_left_coord_im - row * d_image_info->pixel_width;
 
-
-        computed_slice[j] = (uint32_t)_diverge(parte_reala, parte_imaginara,
-                                  d_image_info->num_iters,
-                                  mandelbrot_quadratic);
-    }
-
-    int valid_pixels = min(slice_size, d_image_info->width - base_col);
-    copy_slice(d_image_info->buffer + row * d_image_info->width + base_col, computed_slice, valid_pixels);
+    computed_slice[threadIdx.y][threadIdx.x] = (uint32_t)_diverge(parte_reala, parte_imaginara,
+                              d_image_info->num_iters,
+                              mandelbrot_quadratic);
+    // why calling __syncthreads() is not important here?
+    d_image_info->buffer[row * d_image_info->width + col] = computed_slice[threadIdx.y][threadIdx.x];
 }
 
 extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
@@ -146,8 +138,7 @@ extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
 
     // TODO: check if 32 is really a good number, despite warp size
     dim3 block(32, 32);
-    int thread_cols = CEIL_DIV(h_image_info->width, SLICE_SIZE);
-    dim3 grid(CEIL_DIV(thread_cols, block.x), CEIL_DIV(h_image_info->height, block.y));
+    dim3 grid(CEIL_DIV(h_image_info->width, 32), CEIL_DIV(h_image_info->height, 32));
 
     _deseneaza_mandelbrot<<<grid, block>>>(d_image_info, SLICE_SIZE);
 
