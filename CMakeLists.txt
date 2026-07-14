@@ -36,6 +36,12 @@ set(DEBUG_FLAGS
     -fno-inline
 )
 
+set(CUDA_DEBUG_FLAGS
+    -g
+    -G
+    -O0
+)
+
 set(RELEASE_FLAGS
     -O3
     -D_FORTIFY_SOURCE=2
@@ -44,9 +50,20 @@ set(RELEASE_FLAGS
 add_library(global_flags INTERFACE)
 
 target_compile_options(global_flags INTERFACE
-    ${COMPILE_FLAGS}
-    $<$<CONFIG:Debug>:${DEBUG_FLAGS}>
-    $<$<CONFIG:Release>:${RELEASE_FLAGS}>
+    $<$<COMPILE_LANGUAGE:C,CXX>:${COMPILE_FLAGS}>
+    $<$<COMPILE_LANGUAGE:C,CXX>:
+        $<$<CONFIG:Debug>:${DEBUG_FLAGS}>
+    >
+    $<$<COMPILE_LANGUAGE:C,CXX>:
+        $<$<CONFIG:Release>:${RELEASE_FLAGS}>
+    >
+
+    $<$<COMPILE_LANGUAGE:CUDA>:
+        $<$<CONFIG:Debug>:${CUDA_DEBUG_FLAGS}>
+    >
+    $<$<COMPILE_LANGUAGE:CUDA>:
+        $<$<CONFIG:Release>:-O3>
+    >
 )
 
 target_link_options(global_flags INTERFACE
