@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <immintrin.h>
+#include <time.h>
 
 #include "mandelbrot.h"
 #include "color_mapping.h"
@@ -27,7 +27,21 @@ FILE* initialize_image(const char* image_name, const int height, const int width
 }
 
 void deseneaza_mandelbrot(image_info* image_info) {
+    // maybe other checks too
+    if (!image_info) {
+        fprintf(stderr, "Image information is null\n");
+        return;
+    }
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
     cuda_generate_iter_array(image_info);
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    double elapsed =
+        (double)(end.tv_sec - start.tv_sec) +
+        (double)(end.tv_nsec - start.tv_nsec) / 1e9;
+    printf("deseneaza_mandelbrot(): time taken for gpu: %.2f\n", elapsed);
 }
 
 uint32_t* buffer_init(int rows, int columns) {

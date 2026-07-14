@@ -4,7 +4,7 @@
 #include <time.h>
 
 int main() {
-    const float scale = 8;
+    const float scale = 1;
     const int height_landscape = (int) (1080 * scale),
     width_landscape            = (int) (1920.f * scale),
     height_portrait            = (int) (1080 * scale),
@@ -53,18 +53,17 @@ int main() {
     double elapsed =
         (double)(end.tv_sec - start.tv_sec) +
         (double)(end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("time taken for gpu: %.2f\n", elapsed);
+    printf("main(): time taken for gpu: %.2f\n", elapsed);
 
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    // save_image_ppm("galaxy.ppm", img_info, &palette);
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    elapsed =
-        (double)(end.tv_sec - start.tv_sec) +
-        (double)(end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("time taken for write: %.2f\n", elapsed);
+    // clock_gettime(CLOCK_MONOTONIC, &start);
+    save_image_ppm("galaxy.ppm", img_info, &palette);
+    // clock_gettime(CLOCK_MONOTONIC, &end);
+    // elapsed =
+    //     (double)(end.tv_sec - start.tv_sec) +
+    //     (double)(end.tv_nsec - start.tv_nsec) / 1e9;
+    // printf("time taken for write: %.2f\n", elapsed);
     free(img_info->buffer);
     free(img_info);
-
 
     return 0;
 }

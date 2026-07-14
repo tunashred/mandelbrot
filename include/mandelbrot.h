@@ -11,7 +11,7 @@ extern "C" {
 
 #include "color_mapping.h"
 
-typedef void(*mandelbrot_func_t)(const double*, const double*, const double*, const double*, double*, double*);
+typedef void(*mandelbrot_func_t)(const double*z, const double*, const double*, const double*, double*, double*);
 
 void dummy_mandelbrot_func(const double* z_real, const double* z_im,
                            const double* c_real, const double* c_im,

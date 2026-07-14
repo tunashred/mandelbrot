@@ -1,6 +1,8 @@
 #ifndef CUDA_KERNEL_CUH
 #define CUDA_KERNEL_CUH
 
+#define CEIL_DIV(a, b) (a + b - 1) / b
+
 #define CUDA_ASSERT(call)                                                      \
   {                                                                            \
     cudaError_t e = (call);                                                    \

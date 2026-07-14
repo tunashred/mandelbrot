@@ -5,6 +5,8 @@
 #include "kernel.cuh"
 #include "mandelbrot.h"
 
+#define SLICE_SIZE 16
+
 __device__
 void mandelbrot_quadratic(const double* z_real, const double* z_im,
                           const double* c_real, const double* c_im,
@@ -73,25 +75,58 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
 
 __global__
 void diverge(double c_real, double c_im, int num_iters, mandelbrot_func_t mandelbrot_func, int* ret) {
+    printf("unused function?\n");
     *ret = _diverge(c_real, c_im, num_iters, mandelbrot_func);
 }
 
+__device__
+void copy_slice(uint32_t* dest, uint32_t* src, size_t elems) {
+    if (!dest) {
+        // fprintf(stderr, "copy_slice(): destination pointer is null");
+        return;
+    }
+    if (!src) {
+        // fprintf(stderr, "copy_slice(): src pointer is null");
+        return;
+    }
+
+    for (size_t i = 0; i < elems; i++) {
+        dest[i] = src[i];
+    }
+}
+
+// this thing still does not benefit from shared memory
+// and I am pretty sure that the tiling strategy will be changed when stuff will be brought to shared memory
 __global__
-void _deseneaza_mandelbrot(image_info* d_image_info) {
+void _deseneaza_mandelbrot(image_info* d_image_info, int slice_size) {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int base_col = col * slice_size;
 
-    if (col >= d_image_info->width || row >= d_image_info->height)
+    if (base_col >= d_image_info->width || row >= d_image_info->height) {
         return;
+    }
 
-    double parte_reala     = d_image_info->top_left_coord_real + col * d_image_info->pixel_width;
-    double parte_imaginara = d_image_info->top_left_coord_im   - row * d_image_info->pixel_width;
+    // TODO: warning variable sized static arrays cannot be used in C++
+    uint32_t computed_slice[SLICE_SIZE];
 
-    int iter_count = _diverge(parte_reala, parte_imaginara,
-                              d_image_info->num_iters,
-                              mandelbrot_quadratic);
+    for (int j = 0; j < slice_size; j++) {
+        int pixel_col = base_col + j;
+        if (pixel_col >= d_image_info->width) {
+            break;
+        }
+        
+        double parte_reala     = d_image_info->top_left_coord_real + pixel_col * d_image_info->pixel_width;
+        double parte_imaginara = d_image_info->top_left_coord_im - row * d_image_info->pixel_width;
 
-    d_image_info->buffer[row * d_image_info->width + col] = (uint32_t)iter_count;
+
+        computed_slice[j] = (uint32_t)_diverge(parte_reala, parte_imaginara,
+                                  d_image_info->num_iters,
+                                  mandelbrot_quadratic);
+    }
+
+    int valid_pixels = min(slice_size, d_image_info->width - base_col);
+    copy_slice(d_image_info->buffer + row * d_image_info->width + base_col, computed_slice, valid_pixels);
 }
 
 extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
@@ -109,13 +144,12 @@ extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
 
     h_image_info->buffer = original_host_buffer;
 
-    dim3 block(16, 16);
-    dim3 grid(
-        (h_image_info->width  + block.x - 1) / block.x,
-        (h_image_info->height + block.y - 1) / block.y
-    );
+    // TODO: check if 32 is really a good number, despite warp size
+    dim3 block(32, 32);
+    int thread_cols = CEIL_DIV(h_image_info->width, SLICE_SIZE);
+    dim3 grid(CEIL_DIV(thread_cols, block.x), CEIL_DIV(h_image_info->height, block.y));
 
-    _deseneaza_mandelbrot<<<grid, block>>>(d_image_info);
+    _deseneaza_mandelbrot<<<grid, block>>>(d_image_info, SLICE_SIZE);
 
     CUDA_ASSERT(cudaDeviceSynchronize());
 
