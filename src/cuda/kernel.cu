@@ -5,8 +5,6 @@
 #include "kernel.cuh"
 #include "mandelbrot.h"
 
-#define SLICE_SIZE 16
-
 __device__
 void mandelbrot_quadratic(const double* z_real, const double* z_im,
                           const double* c_real, const double* c_im,
@@ -99,7 +97,7 @@ void copy_slice(uint32_t* dest, uint32_t* src, size_t elems) {
 // and I am pretty sure that the tiling strategy will be changed when stuff will be brought to shared memory
 // TODO: remove slice_size
 __global__
-void _deseneaza_mandelbrot(image_info* d_image_info, int slice_size) {
+void _deseneaza_mandelbrot(image_info* d_image_info) {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -107,18 +105,14 @@ void _deseneaza_mandelbrot(image_info* d_image_info, int slice_size) {
         return;
     }
 
-    // TODO: warning variable sized static arrays cannot be used in C++
-    // is this the right size? just a full block?
-    __shared__ uint32_t computed_slice[32][32];
-
     double parte_reala     = d_image_info->top_left_coord_real + col * d_image_info->pixel_width;
     double parte_imaginara = d_image_info->top_left_coord_im - row * d_image_info->pixel_width;
 
-    computed_slice[threadIdx.y][threadIdx.x] = (uint32_t)_diverge(parte_reala, parte_imaginara,
+    uint32_t iter_count = (uint32_t)_diverge(parte_reala, parte_imaginara,
                               d_image_info->num_iters,
                               mandelbrot_quadratic);
-    // why calling __syncthreads() is not important here?
-    d_image_info->buffer[row * d_image_info->width + col] = computed_slice[threadIdx.y][threadIdx.x];
+
+    d_image_info->buffer[row * d_image_info->width + col] = iter_count;
 }
 
 extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
@@ -140,7 +134,7 @@ extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
     dim3 block(32, 32);
     dim3 grid(CEIL_DIV(h_image_info->width, 32), CEIL_DIV(h_image_info->height, 32));
 
-    _deseneaza_mandelbrot<<<grid, block>>>(d_image_info, SLICE_SIZE);
+    _deseneaza_mandelbrot<<<grid, block>>>(d_image_info);
 
     CUDA_ASSERT(cudaDeviceSynchronize());
 
