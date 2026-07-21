@@ -5,7 +5,9 @@
 #include "kernel.cuh"
 #include "mandelbrot.h"
 
-__device__
+__constant__ image_info c_image_info;
+
+__device__ __forceinline__
 void mandelbrot_quadratic(const double* z_real, const double* z_im,
                           const double* c_real, const double* c_im,
                           double* rez_real, double* rez_im) {
@@ -14,12 +16,12 @@ void mandelbrot_quadratic(const double* z_real, const double* z_im,
 }
 
 __device__
-int _diverge(double c_real, double c_im, int num_iters, mandelbrot_func_t mandelbrot_func) {
+int _diverge(double c_real, double c_im, int num_iters) {
     int i = 0;
     double z_real = 0, z_im = 0;
     double z_real_returnat, z_im_returnat;
     while( z_real <= 2.f && z_real >= -2.f && i++ <= num_iters ) {
-        mandelbrot_func(&z_real, &z_im, &c_real, &c_im, &z_real_returnat, &z_im_returnat);
+        mandelbrot_quadratic(&z_real, &z_im, &c_real, &c_im, &z_real_returnat, &z_im_returnat);
         z_real = z_real_returnat;
         z_im = z_im_returnat;
     }
@@ -39,6 +41,7 @@ double _linear_map(double from, double from_min, double from_max, double to_min,
     return (to_min + normalised_to);
 }
 
+// unused
 __device__
 void roteste(double *real, double *imaginar, double centru_real, double centru_im, double grade) {
     if (grade == 0) {
@@ -72,47 +75,21 @@ void roteste(double *real, double *imaginar, double centru_real, double centru_i
 }
 
 __global__
-void diverge(double c_real, double c_im, int num_iters, mandelbrot_func_t mandelbrot_func, int* ret) {
-    printf("unused function?\n");
-    *ret = _diverge(c_real, c_im, num_iters, mandelbrot_func);
-}
-
-__device__
-void copy_slice(uint32_t* dest, uint32_t* src, size_t elems) {
-    if (!dest) {
-        // fprintf(stderr, "copy_slice(): destination pointer is null");
-        return;
-    }
-    if (!src) {
-        // fprintf(stderr, "copy_slice(): src pointer is null");
-        return;
-    }
-
-    for (size_t i = 0; i < elems; i++) {
-        dest[i] = src[i];
-    }
-}
-
-// this thing still does not benefit from shared memory
-// and I am pretty sure that the tiling strategy will be changed when stuff will be brought to shared memory
-// TODO: remove slice_size
-__global__
-void _deseneaza_mandelbrot(image_info* d_image_info) {
+void _deseneaza_mandelbrot() {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (col >= d_image_info->width || row >= d_image_info->height) {
+    if (col >= c_image_info.width || row >= c_image_info.height) {
         return;
     }
 
-    double parte_reala     = d_image_info->top_left_coord_real + col * d_image_info->pixel_width;
-    double parte_imaginara = d_image_info->top_left_coord_im - row * d_image_info->pixel_width;
+    double parte_reala     = c_image_info.top_left_coord_real + col * c_image_info.pixel_width;
+    double parte_imaginara = c_image_info.top_left_coord_im - row * c_image_info.pixel_width;
 
     uint32_t iter_count = (uint32_t)_diverge(parte_reala, parte_imaginara,
-                              d_image_info->num_iters,
-                              mandelbrot_quadratic);
+                              c_image_info.num_iters);
 
-    d_image_info->buffer[row * d_image_info->width + col] = iter_count;
+    c_image_info.buffer[row * c_image_info.width + col] = iter_count;
 }
 
 extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
@@ -124,17 +101,14 @@ extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
     uint32_t* original_host_buffer = h_image_info->buffer;
     h_image_info->buffer = d_buffer;
 
-    image_info* d_image_info;
-    CUDA_ASSERT(cudaMalloc((void**)&d_image_info, sizeof *h_image_info));
-    CUDA_ASSERT(cudaMemcpy(d_image_info, h_image_info, sizeof *h_image_info, cudaMemcpyHostToDevice));
+    CUDA_ASSERT(cudaMemcpyToSymbol(c_image_info, h_image_info, sizeof *h_image_info));
 
     h_image_info->buffer = original_host_buffer;
 
-    // TODO: check if 32 is really a good number, despite warp size
-    dim3 block(32, 32);
-    dim3 grid(CEIL_DIV(h_image_info->width, 32), CEIL_DIV(h_image_info->height, 32));
+    dim3 block(16, 16);
+    dim3 grid(CEIL_DIV(h_image_info->width, 16), CEIL_DIV(h_image_info->height, 16));
 
-    _deseneaza_mandelbrot<<<grid, block>>>(d_image_info);
+    _deseneaza_mandelbrot<<<grid, block>>>();
 
     CUDA_ASSERT(cudaDeviceSynchronize());
 
@@ -142,5 +116,4 @@ extern "C" void cuda_generate_iter_array(image_info* h_image_info) {
                            size * sizeof *d_buffer, cudaMemcpyDeviceToHost));
 
     CUDA_ASSERT(cudaFree(d_buffer));
-    CUDA_ASSERT(cudaFree(d_image_info));
 }

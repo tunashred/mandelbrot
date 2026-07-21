@@ -3,6 +3,7 @@
 
 #define CEIL_DIV(a, b) (a + b - 1) / b
 
+// is there a way to improve this? see cudaErrorInvalidValue
 #define CUDA_ASSERT(call)                                                      \
   {                                                                            \
     cudaError_t e = (call);                                                    \
