@@ -24,21 +24,21 @@ int main() {
     free(img_info->buffer);
     free(img_info);
 
-    // // shells
+    // shells
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.75 + 0.00005, -0.02, 0.00025, 1500);
     deseneaza_mandelbrot(img_info);
     save_image_ppm("shells.ppm", img_info, &palette);
     free(img_info->buffer);
     free(img_info);
 
-    // // seastar
+    // seastar
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.72413, 0.28644, 0.0004, 1500);
     deseneaza_mandelbrot(img_info);
     save_image_ppm("shells.ppm", img_info, &palette);
     free(img_info->buffer);
     free(img_info);
 
-    // // stuff
+    // stuff
     img_info = mandelbrot_around_center(height_portrait, width_portrait, -0.7, -0.26, 0.01, 1500);
     deseneaza_mandelbrot(img_info);
     save_image_ppm("stuff.ppm", img_info, &palette);
