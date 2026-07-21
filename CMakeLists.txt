@@ -22,10 +22,6 @@ set(COMPILE_FLAGS
     -Wcast-qual
     -Wconversion
     -Wunreachable-code
-    -fstack-usage
-    -pthread
-    # -march=native
-    # -mtune=native
 )
 
 set(DEBUG_FLAGS
@@ -62,7 +58,7 @@ target_compile_options(global_flags INTERFACE
         $<$<CONFIG:Debug>:${CUDA_DEBUG_FLAGS}>
     >
     $<$<COMPILE_LANGUAGE:CUDA>:
-        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:Release>:-O3 -arch=sm_86>
     >
 )
 
@@ -95,25 +91,5 @@ set_target_properties(${EXECUTABLE} PROPERTIES
 target_link_libraries(${EXECUTABLE}
     PRIVATE global_flags
 )
-
-function(generate_assembly_for_file SRC_FILE)
-    get_filename_component(FILE_NAME ${SRC_FILE} NAME_WE)
-
-    add_custom_target(
-        ${FILE_NAME}_assembly
-        COMMAND ${CMAKE_C_COMPILER}
-            ${DEBUG_FLAGS}
-            -I${CMAKE_SOURCE_DIR}/include
-            -S ${SRC_FILE}
-            -o ${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.s
-        COMMENT "Generating assembly for ${FILE_NAME}.c"
-    )
-endfunction()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    foreach(SRC_FILE IN LISTS C_SOURCES)
-        generate_assembly_for_file(${SRC_FILE})
-    endforeach()
-endif()
 
 include(${CMAKE_SOURCE_DIR}/tests/Tests.cmake)
