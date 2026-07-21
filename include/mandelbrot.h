@@ -40,7 +40,7 @@ uint32_t* buffer_init(int rows, int columns);
 
 image_info* mandelbrot_around_center(const int inaltime_poza, const int latime_poza,
                                      double center_coord_real, double center_coord_imaginar, double radius,
-                                     int num_iters, double rotate_degrees, mandelbrot_func_t mandelbrot_func);
+                                     int num_iters);
 
 void save_image_ppm(const char* image_name, image_info* image_info, color_palette* palette);
 
